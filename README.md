@@ -1,4 +1,4 @@
-This is an "engine", to put it in generous terms, for building websites using markdown files. This will be used for my github.io page for now. I do not recommend using this, but it is open source, so you can do whatever you want with it.
+This is an "engine", to put it in generous terms, for building websites using markdown files. I do not recommend using this, but it is open source, so you can do whatever you want with it.
 
 # Development
 ### Install dependencies
