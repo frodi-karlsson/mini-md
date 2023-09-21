@@ -1,0 +1,74 @@
+body {
+  font-family: "Inter", sans-serif;
+  font-size: calc(37px - 1.3vw);
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+main {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 10px 0 0 200px;
+}
+
+input[type="checkbox"] {
+  height: calc(1.5em - 0.4vw);
+  width: calc(1.5em - 0.4vw);
+  pointer-events: none;
+}
+
+main a:link {
+  text-decoration: none;
+}
+
+main a:visited {
+  text-decoration: none;
+}
+
+main a:active {
+  text-decoration: underline;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+aside {
+  font-size: calc(34px - 1vw);
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 180px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+aside ul {
+  list-style: none;
+  padding: 0;
+}
+
+aside li {
+  padding: 0 0px 4px 1vw;
+}
+
+aside a {
+  text-decoration: none;
+  text-wrap: nowrap;
+}
+
+img {
+  max-width: 25%;
+  width: auto;
+  height: auto;
+}
+
+img[alt^="social image:"] {
+  height: calc(37px - 1.3vw);
+  width: ccalc(37px - 1.3vw);
+
+  border-radius: 50%;
+  scale: 1.5;
+}

@@ -1,0 +1,20 @@
+{
+  "name": "minimalist-md-website",
+  "version": "1.0.0",
+  "description": "A minimalist markdown website",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "Frodi Karlsson",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.0.1",
+    "helmet": "^7.0.0",
+    "markdown-it": "^13.0.1",
+    "markdown-it-checkbox": "^1.1.0"
+  }
+}
