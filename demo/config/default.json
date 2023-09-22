@@ -1,0 +1,15 @@
+{
+    "Templates": {
+        "dir": "/templates"
+    },
+    "Styles": {
+        "dir": "/styles"
+    },
+    "Scripts": {
+        "dir": "/scripts"
+    },
+    "Components": {
+        "dir": "/components"
+    }
+
+}

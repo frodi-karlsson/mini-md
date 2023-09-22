@@ -1,0 +1,24 @@
+body {
+    background-color: #242526;
+    color: lightgray;
+}
+
+main a:link {
+    color: #00a2ff;
+}
+
+main a:visited {
+    color: pink;
+}
+
+main a:active {
+    color: #00a2ff;
+}
+
+main a:hover {
+    color: #00a2ff;
+}
+
+aside a {
+    color: lightgray;
+}
