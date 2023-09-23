@@ -6,6 +6,7 @@
 
 [//]: # (template="shared")
 
+<div class="content">
 
 # Sample homepage
 
@@ -30,3 +31,4 @@ It's also called Home instead of Index in the navbar.
 The navigation bar is a custom HTMLElement that can be found in `components/nav-component.html`.
 The component directory can be changed in `config/*.json`.
 Custom components should be defined as script tags in html files so that they can access the global scope of the page. This is necessary for defining custom HTMLElements.
+</div>

@@ -6,7 +6,7 @@ body {
   text-size-adjust: 100%;
 }
 
-main {
+.content {
   position: absolute;
   top: 0;
   left: 0;

@@ -9,7 +9,7 @@ class NavComponent extends HTMLElement {
       if (template.includes("->")) {
         [name, path] = template.split("->");
       } else {
-        name = template;
+        name = template.replace(/^\//, "");
         path = template;
       }
       if (path.includes("/")) {

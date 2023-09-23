@@ -14,11 +14,9 @@ miniMd.use(
 
 const routes = [
   ["/", "index"],
-  ["/editing", "editing"],
+  ["/syntax", "syntax"],
   ["/schemes", "schemes"],
-  ["/shared", "shared"],
-  ["/socials", "socials"],
-  ["/titles", "titles"],
+  ["/seo", "SEO"],
   ["*", "404"],
 ];
 

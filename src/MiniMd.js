@@ -13,7 +13,7 @@ export default class MiniMD {
   _templates;
   _other__dirname;
   /**
-   * @typedef {([string, string] | [string])[]} routes
+   * @typedef {([string, string])[]} routes
    */
   /**
    * @type {routes}
@@ -53,7 +53,15 @@ export default class MiniMD {
    * @returns {void}
    */
   addRoutes(routes) {
-    this._routes = routes;
+    this._routes = routes.map(([route, name]) => {
+      if (!route.startsWith("/")) {
+        route = "/" + route;
+      }
+      if (!route.endsWith("/")) {
+        route = route + "/";
+      }
+      return [route, name];
+    });
   }
 
   /**
@@ -160,14 +168,18 @@ export default class MiniMD {
     this.app = express();
     this.static();
     this.use((req, res, next) => {
-      console.log("req", req.path);
+      const baseUrl = req.baseUrl;
+      const path = req.path;
+      const fullPath = baseUrl + path;
+      console.log("req", fullPath);
       next();
     });
     this._handlers.forEach((handler) => {
       this.app[handler.method](handler.path, handler.handler);
     });
     this._routes.forEach(([route, name]) => {
-      this.app.get(route[0], (req, res, next) => {
+      console.log("adding route", route, name);
+      this.app.get(route, (req, res, next) => {
         const template = this.getTemplate(name);
         if (!template) {
           console.warn("Could not find template: " + name);
