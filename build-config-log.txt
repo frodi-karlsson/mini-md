@@ -1,5 +1,0 @@
-Creating config directory and default config file
-Project root: C:\Users\easte\Documents\progg\bounties\minimalist-websit
-Directory of this script: C:\Users\easte\Documents\progg\bounties\minimalist-website
-Config directory already exists: C:\Users\easte\Documents\progg\bounties\minimalist-websit/config
-Default config already exists: C:\Users\easte\Documents\progg\bounties\minimalist-websit/config/default.json

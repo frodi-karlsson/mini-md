@@ -1,3 +1,4 @@
 sslcert/*
 node_modules
 demo/mini-md-*.tgz
+build-config-log.txt
