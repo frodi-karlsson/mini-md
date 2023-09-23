@@ -1,0 +1,23 @@
+{
+    "Templates": {
+        "dir": "src/templates",
+        "path": "/mini-md/templates"
+    },
+    "Styles": {
+        "dir": "src/styles",
+        "path": "/mini-md/styles"
+    },
+    "Scripts": {
+        "dir": "src/scripts",
+        "path": "/mini-md/scripts"
+    },
+    "Components": {
+        "dir": "src/components",
+        "path": "/mini-md/components"
+    },
+    "Assets": {
+        "dir": "src/assets",
+        "path": "/mini-md/assets"
+    }
+
+}

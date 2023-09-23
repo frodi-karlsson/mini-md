@@ -10,7 +10,7 @@ describe("MiniMd", () => {
   });
 
   it("should read custom tags from the components directory", () => {
-    const tags = miniMd.readCustomTags();
+    const tags = miniMd.readComponents();
     expect(tags.length).toBeGreaterThan(0);
     expect(tags[0].includes("<!DOCTYPE html>")).toBe(true);
   });
@@ -40,8 +40,8 @@ describe("MiniMd", () => {
 
   it("addCustomTagScript", () => {
     const content = `<head></head>`;
-    miniMd._customTags = ["script"];
-    const addedCustom = miniMd.addCustomTagScript(content);
+    miniMd._components = ["script"];
+    const addedCustom = miniMd.makeComponentTags(content);
     expect(addedCustom).toBe(`<head>\nscript</head>`);
   });
 });

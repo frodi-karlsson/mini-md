@@ -1,9 +1,5 @@
-import path from "path";
-import fs from "fs";
-
 export default class Template {
   _name;
-  _path;
   _content;
 
   /**
@@ -11,17 +7,8 @@ export default class Template {
    * @param {string} name The name of the template
    * @param {string} path The path to the template
    */
-  constructor(name, path) {
+  constructor(name, content) {
     this._name = name;
-    this._path = path;
-    let content;
-    try {
-      content = fs.readFileSync(this.path, "utf8");
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
-
     this._content = content;
   }
 
@@ -32,15 +19,6 @@ export default class Template {
   get name() {
     return this._name;
   }
-
-  /**
-   * The path to the template
-   * @returns {string}
-   */
-  get path() {
-    return this._path;
-  }
-
   /**
    * The content of the template
    * @returns {string}

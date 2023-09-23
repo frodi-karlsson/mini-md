@@ -2,33 +2,153 @@ import MarkdownIt from "markdown-it";
 import markdownItCheckbox from "markdown-it-checkbox";
 import markdownItAttrs from "markdown-it-attrs";
 import markdownitAnchor from "markdown-it-anchor";
-import config from "config";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import Template from "./Template.js";
 import express from "express";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import IO from "./IO.js";
 
 /**
  * Express engine for serving MiniMD templates
  */
 export default class MiniMD {
-  _customTags;
   _templates;
   _other__dirname;
   /**
+   * @typedef {([string, string] | [string])[]} routes
+   */
+  /**
+   * @type {routes}
+   */
+  _routes;
+  /**
+   * @type {MarkdownIt}
+   */
+  _md;
+  /**
+   * @type {IO}
+   */
+  io;
+  /**
+   * @type {express.Application}
+   */
+  app;
+  /**
+   * @typedef {Object} Handler
+   * @property {string} path
+   * @property {express.RequestHandler} handler
+   * @property {string} method
+   */
+  /**
+   * @type {Handler[]}
+   */
+  _handlers = [];
+  /**
    * The markdown parser
-   * @param {string} other__dirname The directory name of the app
    * @param {Express} app The express app
    */
-  constructor(other__dirname, app) {
-    this._other__dirname = other__dirname;
-    this.static(app);
-    this._customTags = this.readCustomTags(other__dirname);
-    this._templates = this.readTemplates(other__dirname);
+  constructor() {}
+
+  /**
+   * Adds the given routes
+   * @param {routes} routes The routes to add
+   * @returns {void}
+   */
+  addRoutes(routes) {
+    this._routes = routes;
+  }
+
+  /**
+   * Adds a path to the express app
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   */
+  use(path, handler) {
+    if (!handler) {
+      handler = path;
+      path = "*";
+    }
+    const miniHandler = {
+      path,
+      handler,
+      method: "use",
+    };
+    this._handlers.push(miniHandler);
+  }
+
+  /**
+   * Adds a get route to the express app
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   */
+  get(path, handler) {
+    const miniHandler = {
+      path,
+      handler,
+      method: "get",
+    };
+    this._handlers.push(miniHandler);
+  }
+
+  /**
+   * Adds a post route to the express app
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   */
+  post(path, handler) {
+    const miniHandler = {
+      path,
+      handler,
+      method: "post",
+    };
+    this._handlers.push(miniHandler);
+  }
+
+  /**
+   * Serves the express app
+   * @param {number} port The port to serve on
+   * @param {() => void} onListen The callback to run when the server starts listening
+   * @returns {void}
+   */
+  listen(port, onListen) {
+    this.app.listen(port, onListen);
+  }
+
+  /**
+   * Read the templates from the directory specified in the config. The templates must be markdown files.
+   * @returns {Template[]}
+   */
+  readTemplates() {
+    /**
+     * @type {Template[]}
+     */
+    const templates = [];
+    const userTemplates = this.io.getFiles("Templates", "user").map((file) => {
+      const name = file.replace(".md", "");
+      return new Template(
+        name,
+        this.io.getFileContent(file, "Templates", "user")
+      );
+    });
+    const projectTemplates = this.io
+      .getFiles("Templates", "project")
+      .map((file) => {
+        const name = file.replace(".md", "");
+        return new Template(
+          name,
+          this.io.getFileContent(file, "Templates", "project")
+        );
+      });
+    templates.push(...userTemplates);
+    templates.push(...projectTemplates);
+    console.log("templates", templates);
+    return templates;
+  }
+
+  /**
+   * Initialize the app
+   */
+  init() {
+    this.io = new IO();
+    this._templates = this.readTemplates();
     this._md = new MarkdownIt({
       html: true,
       linkify: true,
@@ -37,79 +157,26 @@ export default class MiniMD {
     this._md.use(markdownItCheckbox);
     this._md.use(markdownItAttrs);
     this._md.use(markdownitAnchor);
-  }
-
-  /**
-   * Read custom tag scripts from the directory specified in the config. The custom tags must be javascript files.
-   * @returns {string[]}
-   */
-  readCustomTags() {
-    const tags = [];
-    const customTagDir = config.get("Components.dir");
-    const exists = fs.existsSync(path.join(this._other__dirname, customTagDir));
-    if (!exists) {
-      console.warn("Custom tag directory does not exist: " + customTagDir);
-    } else {
-      const files = fs.readdirSync(
-        path.join(this._other__dirname, customTagDir)
-      );
-      files.forEach((file) => {
-        if (file.split(".").pop() !== "js") {
-          console.warn("Ignoring non-javascript file: " + file);
-          return;
-        }
-        tags.push(path.join(customTagDir, file));
-      });
-    }
-    const libraryTagDir = path.join(__dirname, "./components");
-    const libraryExists = fs.existsSync(libraryTagDir);
-    if (!libraryExists) {
-      console.warn("Library tag directory does not exist: " + libraryTagDir);
-    } else {
-      const libraryFiles = fs.readdirSync(libraryTagDir);
-      libraryFiles.forEach((file) => {
-        if (file.split(".").pop() !== "js") {
-          console.warn("Ignoring non-javascript file: " + file);
-          return;
-        }
-        tags.push("/mini-md/components/" + file);
-      });
-    }
-    return tags;
-  }
-
-  /**
-   * Read the templates from the directory specified in the config. The templates must be markdown files.
-   * @returns {Template[]}
-   */
-  readTemplates(other__dirname) {
-    /**
-     * @type {Template[]}
-     */
-    const templates = [];
-    const templateDir = config.get("Templates.dir");
-    const replaced = templateDir.replace(/^\//, "");
-    const exists = fs.existsSync(path.join(other__dirname, replaced));
-    if (!exists) {
-      console.warn("Template directory does not exist: " + templateDir);
-      return templates;
-    }
-    const files = fs.readdirSync(path.join(other__dirname, replaced));
-    files.forEach((file) => {
-      if (file.split(".").pop() !== "md") {
-        console.warn("Ignoring non-markdown file: " + file);
-        return;
-      }
-      const tempPath = path.join(other__dirname, replaced, file);
-      const name = file.replace(".md", "");
-      const template = new Template(name, tempPath);
-      templates.push(template);
+    this.app = express();
+    this.static();
+    this.use((req, res, next) => {
+      console.log("req", req.path);
+      next();
     });
-    console.log(
-      "templates",
-      templates.map((template) => template.name).join(", ")
-    );
-    return templates;
+    this._handlers.forEach((handler) => {
+      this.app[handler.method](handler.path, handler.handler);
+    });
+    this._routes.forEach(([route, name]) => {
+      this.app.get(route[0], (req, res, next) => {
+        const template = this.getTemplate(name);
+        if (!template) {
+          console.warn("Could not find template: " + name);
+          return next();
+        }
+        const rendered = this.renderTemplate(template);
+        res.send(rendered);
+      });
+    });
   }
 
   /**
@@ -118,48 +185,14 @@ export default class MiniMD {
    * @param {Express} app The express app
    * @returns {void}
    */
-  static(app) {
-    const other__dirname = this._other__dirname;
-    const styles = config.get("Styles.dir");
-    app.use(styles, express.static(path.join(other__dirname, styles)));
-    const components = config.get("Components.dir");
-    app.use(components, express.static(path.join(other__dirname, components)));
-    const templateDir = config.get("Templates.dir");
-    app.use(
-      templateDir,
-      express.static(path.join(other__dirname, templateDir))
-    );
-    const scripts = config.get("Scripts.dir");
-    app.use(scripts, express.static(path.join(other__dirname, scripts)));
-    app.use(
-      "/mini-md/scripts",
-      express.static(path.join(__dirname, "scripts"))
-    );
-    app.use("/mini-md/styles", express.static(path.join(__dirname, "styles")));
-    app.use(
-      "/mini-md/components",
-      express.static(path.join(__dirname, "components"))
-    );
-    app.use("/assets", express.static(other__dirname + "/assets"));
-  }
-
-  /**
-   * Get the MD engine for express
-   * @returns {Express.Engine}
-   */
-  getRequestHandler() {
-    const onReq = (req, res, next) => {
-      const path = req.path;
-      const base = req.baseUrl;
-      let fullPath = base + path;
-      const template = this.getTemplate(fullPath.replace(/^\//, ""));
-      if (!template) {
-        return next();
-      }
-      const rendered = this.renderTemplate(template);
-      res.send(rendered);
-    };
-    return onReq.bind(this);
+  static() {
+    ["user", "project"].forEach((type) => {
+      ["Styles", "Components", "Templates", "Assets"].forEach((dir) => {
+        const configPath = this.io.getPath(dir, type);
+        const configDir = this.io.getDirPath(dir, type);
+        this.use(configPath, express.static(configDir));
+      });
+    });
   }
 
   /**
@@ -181,12 +214,10 @@ export default class MiniMD {
     const content = template.content;
     const parsedAttrs = this.parseAttrs(content);
     const { dependencies, ...attrs } = parsedAttrs;
-    console.log("parsing", template.name);
-    console.log("dependencies", dependencies);
     const withDependencies = this.addDependencies(content, dependencies);
     const rendered = this._md.render(withDependencies);
-    const addedCustom = this.addCustomTagScript(rendered);
-    const wrapped = this.wrap(addedCustom, attrs);
+    const componentTag = this.makeComponentTags(rendered);
+    const wrapped = this.wrap(componentTag, attrs);
     return wrapped;
   }
 
@@ -200,7 +231,6 @@ export default class MiniMD {
     dependencies.sort((a, b) => a.index - b.index);
     dependencies.forEach((dependency) => {
       const start = rendered.slice(0, dependency.index + iOffset);
-      console.log("start", start);
       const length = dependency.length;
       const end = rendered.slice(dependency.index + iOffset + length);
       const template = this.getTemplate(dependency.name);
@@ -208,7 +238,6 @@ export default class MiniMD {
         console.warn("Could not find template: " + dependency.name);
         return;
       }
-      console.log("injecting template", template);
       const injected = start + template.content + end;
       iOffset += template.content.length;
       rendered = injected;
@@ -232,14 +261,22 @@ export default class MiniMD {
    * @param {string} rendered The rendered template
    * @returns {string}
    */
-  addCustomTagScript(rendered) {
-    const customTagScript = this._customTags.map((tag) => {
-      return `<script src="${tag}"></script>`;
-    });
-    const addedCustom = `<head>\n${customTagScript.join(
-      "\n"
-    )}\n</head>\n${rendered}`;
-    return addedCustom;
+  makeComponentTags(rendered) {
+    const userComponentPath = this.io.getPath("Components", "user");
+    const userComponents = this.io
+      .getFiles("Components", "user")
+      .map((file) => {
+        return `<script src="${userComponentPath}/${file}"></script>`;
+      });
+    const projectComponentPath = this.io.getPath("Components", "project");
+    const projectComponents = this.io
+      .getFiles("Components", "project")
+      .map((file) => {
+        return `<script src="${projectComponentPath}/${file}"></script>`;
+      });
+    const components = [...userComponents, ...projectComponents];
+    const withHead = `<head>\n${components.join("\n")}\n</head>\n${rendered}`;
+    return withHead;
   }
 
   /**
@@ -302,6 +339,7 @@ export default class MiniMD {
         const key = attrMatch[1];
         const value = attrMatch[2];
         if (key === "template") {
+          console.log("found dependency", value);
           const endOfLine = template.indexOf("\n", macro.index);
           const dependency = {
             name: value,
