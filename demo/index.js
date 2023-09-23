@@ -20,14 +20,21 @@ app.use(
   })
 );
 
+const routes = [
+  ["/", "index"],
+  ["editing"],
+  ["schemes"],
+  ["shared"],
+  ["socials"],
+  ["titles"],
+  ["*", "404"],
+];
+
+miniMd.addRoutes(routes);
+
 const requestHandler = miniMd.getRequestHandler();
 
 app.use(requestHandler);
-
-app.use((req, res) => {
-  console.log("404: " + req.path);
-  res.status(404).send(miniMd.renderTemplate(miniMd.getTemplate("404")));
-});
 
 const port = 3000;
 
