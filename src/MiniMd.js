@@ -330,10 +330,6 @@ export default class MiniMD {
     const attrs = {
       dependencies: [],
     };
-    const lines = template.split("\n");
-    if (lines.length === 0) {
-      return attrs;
-    }
     const regex = /(\[\/\/\]: # \(.*\))/g;
     let matches = [];
     let match;
@@ -351,7 +347,6 @@ export default class MiniMD {
         const key = attrMatch[1];
         const value = attrMatch[2];
         if (key === "template") {
-          console.log("found dependency", value);
           const endOfLine = template.indexOf("\n", macro.index);
           const dependency = {
             name: value,
@@ -360,6 +355,7 @@ export default class MiniMD {
           };
           attrs.dependencies.push(dependency);
         }
+        console.log("attr key", attrMatch[1], "value", attrMatch[2]);
         attrs[attrMatch[1]] = attrMatch[2];
       }
     });

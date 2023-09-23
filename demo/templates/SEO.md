@@ -10,7 +10,7 @@
 
 # SEO and metadata
 
-SEO is important for websites. Mini-md uses the commant syntax described in [syntax](/syntax) to add metadata to pages.
+SEO is important for websites. Mini-md uses the comment syntax described in [syntax](/syntax) to add metadata to pages.
 
 There are a few special fields that wouldn't belong in a meta tag, but are similar in nature. These are:
 
