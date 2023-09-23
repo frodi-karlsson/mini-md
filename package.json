@@ -17,7 +17,6 @@
   "author": "Frodi Karlsson",
   "license": "MIT",
   "dependencies": {
-    "config": "^3.3.9",
     "express": "^4.18.2",
     "markdown-it": "^13.0.1",
     "markdown-it-anchor": "^8.6.7",
