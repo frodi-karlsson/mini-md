@@ -17,6 +17,8 @@ const routes = [
   ["/syntax", "syntax"],
   ["/schemes", "schemes"],
   ["/seo", "SEO"],
+  ["/components", "components"],
+  ["/basic-implementation", "Basic Implementation"],
   ["*", "404"],
 ];
 
@@ -29,5 +31,3 @@ const port = 3000;
 miniMd.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
-
-miniMd.app;

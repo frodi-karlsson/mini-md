@@ -6,17 +6,16 @@ body {
   text-size-adjust: 100%;
 }
 
-.content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 10px 0 0 200px;
+mini-md {
+  height: fit-content;
+  display: grid;
+  grid-template-columns: 1fr;
 }
 
-input[type="checkbox"] {
-  height: calc(1.5em - 0.4vw);
-  width: calc(1.5em - 0.4vw);
-  pointer-events: none;
+.content {
+  grid-row-start: 1;
+  grid-column-start: 1;
+  margin: 10px 0 0 200px;
 }
 
 main a:link {
@@ -34,11 +33,12 @@ main a:active {
 a:hover {
   text-decoration: underline;
 }
+
 #nav-wrapper {
   font-size: calc(34px - 1vw);
-  position: sticky;
-  top: 0;
-  left: 0;
+  grid-row-start: 1;
+  grid-column-start: 1;
+  position: fixed;
   width: 180px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -57,18 +57,4 @@ aside li {
 aside a {
   text-decoration: none;
   text-wrap: nowrap;
-}
-
-img {
-  max-width: 25%;
-  width: auto;
-  height: auto;
-}
-
-img[alt^="social image:"] {
-  height: calc(37px - 1.3vw);
-  width: ccalc(37px - 1.3vw);
-
-  border-radius: 50%;
-  scale: 1.5;
 }

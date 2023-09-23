@@ -2,23 +2,22 @@ body {
     background-color: #242526;
     color: lightgray;
 }
-
-main a:link {
+ a:link {
     color: #00a2ff;
 }
 
-main a:visited {
+a:visited {
     color: pink;
 }
 
-main a:active {
+a:active {
     color: #00a2ff;
 }
 
-main a:hover {
+a:hover {
     color: #00a2ff;
 }
 
-aside a {
+#nav-wrapper a {
     color: lightgray;
 }

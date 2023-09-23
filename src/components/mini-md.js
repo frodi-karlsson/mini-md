@@ -66,9 +66,9 @@ class MiniMarkdownBuilder extends HTMLElement {
     const twitterImageAltHTML = twitterImageAlt
       ? `<meta name="twitter:image:alt" content="${twitterImageAlt}">`
       : "";
-    const stylesHTML = `<link rel="stylesheet" href="styles/styles.css">`;
+    const stylesHTML = `<link rel="stylesheet" href="/styles/styles.css">`;
     const schemeHTML = scheme
-      ? `<link rel="stylesheet" href="styles/schemes/${scheme}.css">`
+      ? `<link rel="stylesheet" href="/styles/schemes/${scheme}.css">`
       : "";
 
     const head = `

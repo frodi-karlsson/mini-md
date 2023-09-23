@@ -1,6 +1,6 @@
 [//]: # (title="Syntax")
 [//]: # (scheme="dark")
-[//]: # (description="")
+[//]: # (description="Mini-md obviously uses Markdown, but it also offers a few extra features.")
 [//]: # (lang="en")
 [//]: # (charset="utf-8")
 
