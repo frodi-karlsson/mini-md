@@ -7,7 +7,7 @@ It is built to be used either as a standalone server or as an express view engin
 ### Install
 
 ```bash
-npm install https://github.com/frodi-karlsson/mini-md.git
+npm i mini-md
 ```
 
 ### Implementing
