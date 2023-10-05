@@ -10,13 +10,16 @@ import IO from "./IO.js";
  * Express engine for serving MiniMD templates
  */
 export default class MiniMD {
-  _templates;
-  _other__dirname;
   /**
-   * @typedef {([string, string])[]} routes
+   * @type {Template[]}
+   */
+  _templates;
+  /**
+   * @typedef {("all" | "get" | "post" | "put" | "delete" | "patch" | "options" | "head" | "use")} Method
+   * @typedef {[string, string] | [string, string, Method]} Route
    */
   /**
-   * @type {routes}
+   * @type {Route[]}
    */
   _routes;
   /**
@@ -35,7 +38,7 @@ export default class MiniMD {
    * @typedef {Object} Handler
    * @property {string} path
    * @property {express.RequestHandler} handler
-   * @property {string} method
+   * @property {Method} method
    */
   /**
    * @type {Handler[]}
@@ -45,27 +48,23 @@ export default class MiniMD {
    * The markdown parser
    * @param {express.Application} app The express app
    */
-
   /**
    * Adds the given routes
-   * @param {routes} routes The routes to add
+   * @param {Route[]} routes The routes to add
    * @returns {void}
    */
   addRoutes(routes) {
-    this._routes = routes.map(([route, name]) => {
+    this._routes = routes.map(([route, name, method]) => {
       if (!route.startsWith("/")) {
         route = "/" + route;
       }
       if (!route.endsWith("/")) {
         route = route + "/";
       }
-      return [route, name];
+      return [route, name, method];
     });
   }
 
-  /**
-   * @typedef {("all" | "get" | "post" | "put" | "delete" | "patch" | "options" | "head" | "use")} Method
-   */
   /**
    * Adds a path to the express app
    * @param {Method} method The method to add
@@ -246,9 +245,9 @@ export default class MiniMD {
     this._handlers.forEach((handler) => {
       this.app[handler.method](handler.path, handler.handler);
     });
-    this._routes.forEach(([route, name]) => {
-      console.log("adding route", route, name);
-      this.app.get(route, (req, res, next) => {
+    this._routes.forEach(([route, name, method]) => {
+      console.log("adding", method, "route", route, "for template", name);
+      this.app[method ?? "get"](route, (req, res, next) => {
         const template = this.getTemplate(name);
         if (!template) {
           console.warn("Could not find template:", name, "for route:", route);

@@ -2,15 +2,18 @@
  * Express engine for serving MiniMD templates
  */
 export default class MiniMD {
-    _templates: any;
-    _other__dirname: any;
     /**
-     * @typedef {([string, string])[]} routes
+     * @type {Template[]}
+     */
+    _templates: Template[];
+    /**
+     * @typedef {("all" | "get" | "post" | "put" | "delete" | "patch" | "options" | "head" | "use")} Method
+     * @typedef {[string, string] | [string, string, Method]} Route
      */
     /**
-     * @type {routes}
+     * @type {Route[]}
      */
-    _routes: [string, string][];
+    _routes: ([string, string] | [string, string, "all" | "head" | "use" | "options" | "get" | "post" | "put" | "delete" | "patch"])[];
     /**
      * @type {MarkdownIt}
      */
@@ -27,7 +30,7 @@ export default class MiniMD {
      * @typedef {Object} Handler
      * @property {string} path
      * @property {express.RequestHandler} handler
-     * @property {string} method
+     * @property {Method} method
      */
     /**
      * @type {Handler[]}
@@ -35,7 +38,7 @@ export default class MiniMD {
     _handlers: {
         path: string;
         handler: express.RequestHandler;
-        method: string;
+        method: "all" | "head" | "use" | "options" | "get" | "post" | "put" | "delete" | "patch";
     }[];
     /**
      * The markdown parser
@@ -43,13 +46,10 @@ export default class MiniMD {
      */
     /**
      * Adds the given routes
-     * @param {routes} routes The routes to add
+     * @param {Route[]} routes The routes to add
      * @returns {void}
      */
-    addRoutes(routes: [string, string][]): void;
-    /**
-     * @typedef {("all" | "get" | "post" | "put" | "delete" | "patch" | "options" | "head" | "use")} Method
-     */
+    addRoutes(routes: ([string, string] | [string, string, "all" | "head" | "use" | "options" | "get" | "post" | "put" | "delete" | "patch"])[]): void;
     /**
      * Adds a path to the express app
      * @param {Method} method The method to add
@@ -416,6 +416,6 @@ export default class MiniMD {
         }[];
     };
 }
+import Template from "./Template.js";
 import MarkdownIt from "markdown-it";
 import IO from "./IO.js";
-import Template from "./Template.js";
