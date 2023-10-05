@@ -150,12 +150,15 @@ export default class MiniMD {
     return templates;
   }
 
-  /**
-   * Initialize the app
-   */
-  init() {
-    this.io = new IO();
+  initIO() {
+    this.io = new IO(this._other__dirname);
+  }
+
+  initTemplates() {
     this._templates = this.readTemplates();
+  }
+
+  initMd() {
     this._md = new MarkdownIt({
       html: true,
       linkify: true,
@@ -164,21 +167,14 @@ export default class MiniMD {
     this._md.use(markdownItCheckbox);
     this._md.use(markdownItAttrs);
     this._md.use(markdownitAnchor);
+  }
+
+  initApp() {
     this.app = express();
     this.static();
-
-    this.use((req, res, next) => {
-      const baseUrl = req.baseUrl;
-      const path = req.path;
-      const fullPath = baseUrl + path;
-      console.log("req", fullPath);
-      next();
-    });
-
     this._handlers.forEach((handler) => {
       this.app[handler.method](handler.path, handler.handler);
     });
-
     this._routes.forEach(([route, name]) => {
       console.log("adding route", route, name);
       this.app.get(route, (req, res, next) => {
@@ -193,6 +189,24 @@ export default class MiniMD {
         res.send(this.makeDocument(head + body, attrs));
       });
     });
+  }
+
+  /**
+   * Initialize the app for standalone use
+   */
+  init() {
+    this.initIO();
+    this.initTemplates();
+    this.initMd();
+    this.initApp();
+  }
+
+  /**
+   * Initialize the app for use as an express engine
+   */
+  initEngine() {
+    this.initIO();
+    this.initMd();
   }
 
   /**
@@ -237,6 +251,25 @@ export default class MiniMD {
     const head = this.buildHead(components, styles, attrs);
     console.log("rendered", wrapped);
     return [wrapped, head];
+  }
+
+  /**
+   * Returns an engine version of mini-md
+   */
+  engine() {
+    this.initEngine();
+    function __express(filePath, options, callback) {
+      const templateFile = this.io.readFile(filePath);
+      const template = new Template(filePath, templateFile);
+      if (!this._templates) this._templates = [];
+      if (!this._templates.includes(template)) this._templates.push(template);
+      const parsedAttrs = this.parseAttrs(template.content);
+      const { dependencies, ...attrs } = parsedAttrs;
+      const [body, head] = this.renderTemplate(template, dependencies, attrs);
+      const document = this.makeDocument(head + body, attrs);
+      return callback(null, document);
+    }
+    return __express.bind(this);
   }
 
   /**

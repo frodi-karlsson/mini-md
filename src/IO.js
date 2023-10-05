@@ -126,9 +126,8 @@ export default class IO {
     if (!config) {
       throw new Error("No config file found in " + configPath);
     }
-    const configContent = fs.readFileSync(
-      path.join(this._userDirPath, "config", config),
-      "utf8"
+    const configContent = this.readFile(
+      path.join(this._userDirPath, "config", config)
     );
     this._config = defaultConfig;
     this.assign(this._config, JSON.parse(configContent));
@@ -270,9 +269,17 @@ export default class IO {
     const dirs = this[`_${type}Dirs`];
     const dirPath = this[`_${type}DirPath`];
     if (dirs[dir]) {
-      return fs.readFileSync(path.join(dirPath, dirs[dir], file), "utf8");
+      return this.readFile(path.join(dirPath, dirs[dir], file));
     } else {
       throw new Error("No directory found for " + dir);
     }
+  }
+
+  /**
+   * Simply returns the content of a file
+   * @param {string} file The file to read
+   */
+  readFile(file) {
+    return fs.readFileSync(file, "utf8");
   }
 }
