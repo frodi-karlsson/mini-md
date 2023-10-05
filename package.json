@@ -10,7 +10,8 @@
     "buildEnv": "node buildenv.js",
     "pack": "npm pack",
     "move": "mv mini-md-1.0.0.tgz ./demo/",
-    "build": "npm run buildEnv && npm run pack && npm run move",
+    "build": "npm run buildEnv && npm run pack && npm run move && cd demo && npm remove mini-md && npm install mini-md-1.0.0.tgz && cd ..",
+    "demo": "cd demo && npm start && cd ..",
     "postinstall": "node buildenv.js > ./build-config-log.txt"
   },
   "keywords": [],

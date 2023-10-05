@@ -1,0 +1,8 @@
+body {
+    opacity: 0;
+  }
+
+  body.ready {
+    opacity: 1;
+    transition: .25s opacity;
+}

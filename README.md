@@ -1,4 +1,4 @@
-This is an "engine", to put it in generous terms, for building websites using markdown files. I do not recommend using this, but it is open source, so you can do whatever you want with it.
+This is a template engine for building websites using markdown files. Right now it wraps express, but an engine version is planned. I do not recommend using this, but it is open source, so you can do whatever you want with it.
 
 # Development
 ### Install dependencies
@@ -9,6 +9,12 @@ npm install
 ### Run the server
 ```bash
 npm start
+```
+
+### Run the demo
+```bash
+npm run build
+npm run demo
 ```
 
 This is largely built on markdown-it and express.js.

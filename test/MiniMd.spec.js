@@ -41,7 +41,7 @@ describe("MiniMd", () => {
   it("addCustomTagScript", () => {
     const content = `<head></head>`;
     miniMd._components = ["script"];
-    const addedCustom = miniMd.makeComponentTags(content);
+    const addedCustom = miniMd.getComponents(content);
     expect(addedCustom).toBe(`<head>\nscript</head>`);
   });
 });

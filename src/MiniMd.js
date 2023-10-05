@@ -45,7 +45,6 @@ export default class MiniMD {
    * The markdown parser
    * @param {Express} app The express app
    */
-  constructor() {}
 
   /**
    * Adds the given routes
@@ -167,6 +166,7 @@ export default class MiniMD {
     this._md.use(markdownitAnchor);
     this.app = express();
     this.static();
+
     this.use((req, res, next) => {
       const baseUrl = req.baseUrl;
       const path = req.path;
@@ -174,9 +174,11 @@ export default class MiniMD {
       console.log("req", fullPath);
       next();
     });
+
     this._handlers.forEach((handler) => {
       this.app[handler.method](handler.path, handler.handler);
     });
+
     this._routes.forEach(([route, name]) => {
       console.log("adding route", route, name);
       this.app.get(route, (req, res, next) => {
@@ -185,8 +187,10 @@ export default class MiniMD {
           console.warn("Could not find template: " + name);
           return next();
         }
-        const rendered = this.renderTemplate(template);
-        res.send(rendered);
+        const parsedAttrs = this.parseAttrs(template.content);
+        const { dependencies, ...attrs } = parsedAttrs;
+        const [body, head] = this.renderTemplate(template, dependencies, attrs);
+        res.send(this.makeDocument(head + body, attrs));
       });
     });
   }
@@ -219,18 +223,20 @@ export default class MiniMD {
   /**
    * Render the given template
    * @param {Template} template The template to render
-   * @param {Express.Response} res The response
-   * @returns {string}
+   * @param {Dependency[]} dependencies The dependencies to inject
+   * @param {Attrs} attrs The attributes to add to the head
+   * @returns {[string, string]} The rendered template and the head
    */
-  renderTemplate(template) {
+  renderTemplate(template, dependencies, attrs) {
     const content = template.content;
-    const parsedAttrs = this.parseAttrs(content);
-    const { dependencies, ...attrs } = parsedAttrs;
     const withDependencies = this.addDependencies(content, dependencies);
     const rendered = this._md.render(withDependencies);
-    const componentTag = this.makeComponentTags(rendered);
-    const wrapped = this.wrap(componentTag, attrs);
-    return wrapped;
+    const wrapped = this.wrap(rendered);
+    const components = this.makeComponentTags();
+    const styles = this.makeStyleTags(attrs);
+    const head = this.buildHead(components, styles, attrs);
+    console.log("rendered", wrapped);
+    return [wrapped, head];
   }
 
   /**
@@ -258,22 +264,110 @@ export default class MiniMD {
   }
 
   /**
+   * Builds the head of the rendered template
+   * @param {string} components The components to add
+   * @param {string[]} styles The styles to add
+   * @param {Attrs} attrs The attributes to add
+   * @returns {string}
+   */
+  buildHead(components, styles, attrs) {
+    return `
+    <head>
+    ${components}
+    ${styles}
+    ${
+      attrs.scheme
+        ? `<link rel="stylesheet" href="${this.io.getPath(
+            "Styles",
+            "user"
+          )}/schemes/${attrs.scheme}.css">`
+        : ""
+    }
+    ${attrs.title ? `<title>${attrs.title}</title>` : ""}
+    ${attrs.charset ? `<meta charset="${attrs.charset}">` : ""}
+    ${
+      attrs.viewport ? `<meta name="viewport" content="${attrs.viewport}">` : ""
+    }
+    ${
+      attrs.description
+        ? `<meta name="description" content="${attrs.description}">`
+        : ""
+    }
+    ${attrs.author ? `<meta name="author" content="${attrs.author}">` : ""}
+    ${
+      attrs.keywords ? `<meta name="keywords" content="${attrs.keywords}">` : ""
+    }
+    ${attrs.robots ? `<meta name="robots" content="${attrs.robots}">` : ""}
+    ${
+      attrs.ogTitle
+        ? `<meta property="og:title" content="${attrs.ogTitle}">`
+        : ""
+    }
+    ${attrs.ogType ? `<meta property="og:type" content="${attrs.ogType}">` : ""}
+    ${attrs.ogUrl ? `<meta property="og:url" content="${attrs.ogUrl}">` : ""}
+    ${
+      attrs.ogDescription
+        ? `<meta property="og:description" content="${attrs.ogDescription}">`
+        : ""
+    }
+    ${
+      attrs.ogImage
+        ? `<meta property="og:image" content="${attrs.ogImage}">`
+        : ""
+    }
+    ${
+      attrs.twitterCard
+        ? `<meta name="twitter:card" content="${attrs.twitterCard}">`
+        : ""
+    }
+    ${
+      attrs.ogLocale
+        ? `<meta property="og:locale" content="${attrs.ogLocale}">`
+        : ""
+    }
+    ${
+      attrs.ogSiteName
+        ? `<meta property="og:site_name" content="${attrs.ogSiteName}">`
+        : ""
+    }
+    ${
+      attrs.twitterImageAlt
+        ? `<meta name="twitter:image:alt" content="${attrs.twitterImageAlt}">`
+        : ""
+    }
+    </head>
+    `;
+  }
+  /**
    * Wraps content in <mini-md> tags
    * @param {string} content The content to wrap
-   * @param {Attrs} attrs The attributes to add to the mini-md tag
+   * @returns {string} The wrapped content
    */
-  wrap(content, attrs) {
-    return `<mini-md ${Object.entries(attrs)
-      .map(([key, value]) => `${key}="${value}"`)
-      .join(" ")}>${content}</mini-md>`;
+  wrap(content) {
+    return `
+    <body>
+      <mini-md>${content}</mini-md>
+    </body>
+      `;
   }
 
   /**
-   * Add the custom tag script to the rendered template
+   * Wraps the rendered template in a document
+   * @param {string} rendered The rendered template
+   */
+  makeDocument(rendered, attrs) {
+    return `<!DOCTYPE html>
+    <html lang="${attrs.lang ?? "en"}">
+      ${rendered}
+    </html>`;
+  }
+
+  /**
+   * Builds the component script tags
    * @param {string} rendered The rendered template
    * @returns {string}
    */
-  makeComponentTags(rendered) {
+  makeComponentTags() {
     const userComponentPath = this.io.getPath("Components", "user");
     const userComponents = this.io
       .getFiles("Components", "user")
@@ -287,8 +381,26 @@ export default class MiniMD {
         return `<script src="${projectComponentPath}/${file}"></script>`;
       });
     const components = [...userComponents, ...projectComponents];
-    const withHead = `<head>\n${components.join("\n")}\n</head>\n${rendered}`;
-    return withHead;
+    return components.join("\n");
+  }
+
+  /**
+   * Builds the style tags
+   * @param {Attrs} attrs The parsed attributes
+   */
+  makeStyleTags(attrs) {
+    const userStylePath = this.io.getPath("Styles", "user");
+    const userStyles = this.io.getFiles("Styles", "user").map((file) => {
+      const parts = file.split(/[/\\]/g);
+      if (!parts.includes("schemes"))
+        return `<link rel="stylesheet" href="${userStylePath}/${file}">`;
+    });
+    const projectStylePath = this.io.getPath("Styles", "project");
+    const projectStyles = this.io.getFiles("Styles", "project").map((file) => {
+      return `<link rel="stylesheet" href="${projectStylePath}/${file}">`;
+    });
+    const styles = [...userStyles, ...projectStyles];
+    return styles.join("\n");
   }
 
   /**
@@ -327,6 +439,7 @@ export default class MiniMD {
    * @returns {Attrs} The parsed attributes
    */
   parseAttrs(template) {
+    console.log("Parsing attrs for template", template);
     const attrs = {
       dependencies: [],
     };
@@ -334,19 +447,22 @@ export default class MiniMD {
     let matches = [];
     let match;
     while ((match = regex.exec(template)) !== null) {
+      console.log("match", match);
       matches.push(match);
     }
     if (matches.length === 0) {
+      console.log("No matches");
       return attrs;
     }
 
     matches.forEach((macro, index) => {
-      const attrRegex = /([a-zA-Z0-9]*)="(.*)"[ ,\)]*/g;
+      const attrRegex = /([a-zA-Z0-9]*)="(.*)"[ ,)]*/g;
       let attrMatch;
       while ((attrMatch = attrRegex.exec(macro[0])) !== null) {
         const key = attrMatch[1];
         const value = attrMatch[2];
         if (key === "template") {
+          console.log("found dependency", value);
           const endOfLine = template.indexOf("\n", macro.index);
           const dependency = {
             name: value,

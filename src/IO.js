@@ -106,7 +106,7 @@ export default class IO {
    */
   assign(obj, values) {
     for (const key in values) {
-      if (typeof values[key] === "array") {
+      if (Array.isArray(values[key])) {
         obj[key] = [...values[key]];
       } else if (typeof values[key] === "object") {
         this.assign(obj[key], values[key]);
@@ -200,6 +200,28 @@ export default class IO {
   }
 
   /**
+   * Reads a directory recursively and returns a list of all files
+   * @param {string} dirPath The path to read
+   */
+  readDirRecursive(dirPath, originalPath = dirPath, files = []) {
+    console.log("Reading dir", dirPath);
+    fs.readdirSync(dirPath, { withFileTypes: true }).forEach((dirent) => {
+      if (dirent.isDirectory()) {
+        console.log("Found directory", dirent.name);
+        files = this.readDirRecursive(
+          path.join(dirPath, dirent.name),
+          originalPath,
+          files
+        );
+      } else {
+        console.log("Found file", dirent.name);
+        files.push(path.join(dirPath.replace(originalPath, ""), dirent.name));
+      }
+    });
+    return files;
+  }
+
+  /**
    * Returns a list of every file in a directory that exists in the config
    * @param {keyof defaultConfig} dir The directory to search
    * @param {"user" | "project"} [type] The type of directory to search
@@ -210,7 +232,7 @@ export default class IO {
     const dirPath = this[`_${type}DirPath`]; // _userDirPath or _projectDirPath
     if (dirs[dir]) {
       if (this.exists(path.join(dirPath, dirs[dir]))) {
-        return fs.readdirSync(path.join(dirPath, dirs[dir]), "utf8");
+        return this.readDirRecursive(path.join(dirPath, dirs[dir]));
       } else {
         console.warn("Directory does not exist: " + dir, "in", type);
         console.warn("Expected path:", path.join(dirPath, dirs[dir]));
