@@ -323,17 +323,14 @@ class IO {
    * @param {string} dirPath The path to read
    */
   readDirRecursive(dirPath, originalPath = dirPath, files = []) {
-    console.log("Reading dir", dirPath);
     fs.readdirSync(dirPath, { withFileTypes: true }).forEach((dirent) => {
       if (dirent.isDirectory()) {
-        console.log("Found directory", dirent.name);
         files = this.readDirRecursive(
           path.join(dirPath, dirent.name),
           originalPath,
           files
         );
       } else {
-        console.log("Found file", dirent.name);
         files.push(path.join(dirPath.replace(originalPath, ""), dirent.name));
       }
     });
@@ -347,7 +344,7 @@ class IO {
    * @returns {string[]} The list of files
    */
   getFiles(dir, type = "user") {
-    if (dir === "Templates" && type === "project") {
+    if (["Templates", "Scripts"].includes(dir) && type === "project") {
       return [];
     }
     const dirs = this[`_${type}Dirs`];
@@ -838,6 +835,7 @@ class MiniMD {
           /** @type {const} */ ("Styles"),
           /** @type {const} */ ("Components"),
           /** @type {const} */ ("Assets"),
+          /** @type {const} */ ("Scripts"),
         ]);
         dirs.forEach((dir) => {
           const configPath = this.io.getPath(dir, type);
@@ -870,8 +868,9 @@ class MiniMD {
     const rendered = this._md.render(withDependencies);
     const wrapped = this.wrap(rendered);
     const components = this.makeComponentTags();
-    const styles = this.makeStyleTags(attrs);
-    const head = this.buildHead(components, styles, attrs);
+    const styles = this.makeStyleTags();
+    const scripts = this.makeScriptTags();
+    const head = this.buildHead(components, styles, scripts, attrs);
     return [wrapped, head];
   }
 
@@ -903,12 +902,14 @@ class MiniMD {
    * Builds the head of the rendered template
    * @param {string} components The components to add
    * @param {string} styles The styles to add
+   * @param {string} scripts The scripts to add
    * @param {Attrs} attrs The attributes to add
    * @returns {string}
    */
-  buildHead(components, styles, attrs) {
+  buildHead(components, styles, scripts, attrs) {
     return `
     <head>
+    ${scripts}
     ${components}
     ${styles}
     ${
@@ -1022,9 +1023,8 @@ class MiniMD {
 
   /**
    * Builds the style tags
-   * @param {Attrs} attrs The parsed attributes
    */
-  makeStyleTags(attrs) {
+  makeStyleTags() {
     const userStylePath = this.io.getPath("Styles", "user");
     const userStyles = this.io.getFiles("Styles", "user").map((file) => {
       const parts = file.split(/[/\\]/g);
@@ -1037,6 +1037,24 @@ class MiniMD {
     });
     const styles = [...userStyles, ...projectStyles];
     return styles.join("\n");
+  }
+
+  /**
+   * Builds the script tags
+   * @returns {string}
+   */
+  makeScriptTags() {
+    const scripts = [];
+    [/** @type {const} */ ("user"), /** @type {const} */ ("project")].forEach(
+      (type) => {
+        const scriptPath = this.io.getPath("Scripts", type);
+        const scriptFiles = this.io.getFiles("Scripts", type);
+        scriptFiles.forEach((file) => {
+          scripts.push(`<script src="${scriptPath}/${file}"></script>`);
+        });
+      }
+    );
+    return scripts.join("\n");
   }
 
   /**

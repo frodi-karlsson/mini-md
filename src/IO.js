@@ -202,7 +202,7 @@ export default class IO {
    * @returns {string[]} The list of files
    */
   getFiles(dir, type = "user") {
-    if (dir === "Templates" && type === "project") {
+    if (["Templates", "Scripts"].includes(dir) && type === "project") {
       return [];
     }
     const dirs = this[`_${type}Dirs`];

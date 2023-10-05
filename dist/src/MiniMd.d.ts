@@ -316,10 +316,11 @@ export default class MiniMD {
      * Builds the head of the rendered template
      * @param {string} components The components to add
      * @param {string} styles The styles to add
+     * @param {string} scripts The scripts to add
      * @param {Attrs} attrs The attributes to add
      * @returns {string}
      */
-    buildHead(components: string, styles: string, attrs: {
+    buildHead(components: string, styles: string, scripts: string, attrs: {
         title?: string;
         lang?: string;
         scheme?: string;
@@ -405,42 +406,13 @@ export default class MiniMD {
     makeComponentTags(): string;
     /**
      * Builds the style tags
-     * @param {Attrs} attrs The parsed attributes
      */
-    makeStyleTags(attrs: {
-        title?: string;
-        lang?: string;
-        scheme?: string;
-        charset?: string;
-        description?: string;
-        author?: string;
-        keywords?: string;
-        viewport?: string;
-        robots?: string;
-        ogTitle?: string;
-        ogType?: string;
-        ogUrl?: string;
-        ogDescription?: string;
-        ogImage?: string;
-        twitterCard?: string;
-        ogLocale?: string;
-        ogSiteName?: string;
-        twitterImageAlt?: string;
-        dependencies?: {
-            /**
-             * The name of the dependency
-             */
-            name: string;
-            /**
-             * The index of the dependency
-             */
-            index: number;
-            /**
-             * The length of the dependency
-             */
-            length: number;
-        }[];
-    }): string;
+    makeStyleTags(): string;
+    /**
+     * Builds the script tags
+     * @returns {string}
+     */
+    makeScriptTags(): string;
     /**
      * Represents a dependency on another template
      * @typedef {Object} Dependency

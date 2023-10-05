@@ -446,6 +446,7 @@ export default class MiniMD {
           /** @type {const} */ ("Styles"),
           /** @type {const} */ ("Components"),
           /** @type {const} */ ("Assets"),
+          /** @type {const} */ ("Scripts"),
         ]);
         dirs.forEach((dir) => {
           const configPath = this.io.getPath(dir, type);
@@ -478,8 +479,9 @@ export default class MiniMD {
     const rendered = this._md.render(withDependencies);
     const wrapped = this.wrap(rendered);
     const components = this.makeComponentTags();
-    const styles = this.makeStyleTags(attrs);
-    const head = this.buildHead(components, styles, attrs);
+    const styles = this.makeStyleTags();
+    const scripts = this.makeScriptTags();
+    const head = this.buildHead(components, styles, scripts, attrs);
     return [wrapped, head];
   }
 
@@ -511,12 +513,14 @@ export default class MiniMD {
    * Builds the head of the rendered template
    * @param {string} components The components to add
    * @param {string} styles The styles to add
+   * @param {string} scripts The scripts to add
    * @param {Attrs} attrs The attributes to add
    * @returns {string}
    */
-  buildHead(components, styles, attrs) {
+  buildHead(components, styles, scripts, attrs) {
     return `
     <head>
+    ${scripts}
     ${components}
     ${styles}
     ${
@@ -630,9 +634,8 @@ export default class MiniMD {
 
   /**
    * Builds the style tags
-   * @param {Attrs} attrs The parsed attributes
    */
-  makeStyleTags(attrs) {
+  makeStyleTags() {
     const userStylePath = this.io.getPath("Styles", "user");
     const userStyles = this.io.getFiles("Styles", "user").map((file) => {
       const parts = file.split(/[/\\]/g);
@@ -645,6 +648,24 @@ export default class MiniMD {
     });
     const styles = [...userStyles, ...projectStyles];
     return styles.join("\n");
+  }
+
+  /**
+   * Builds the script tags
+   * @returns {string}
+   */
+  makeScriptTags() {
+    const scripts = [];
+    [/** @type {const} */ ("user"), /** @type {const} */ ("project")].forEach(
+      (type) => {
+        const scriptPath = this.io.getPath("Scripts", type);
+        const scriptFiles = this.io.getFiles("Scripts", type);
+        scriptFiles.forEach((file) => {
+          scripts.push(`<script src="${scriptPath}/${file}"></script>`);
+        });
+      }
+    );
+    return scripts.join("\n");
   }
 
   /**
