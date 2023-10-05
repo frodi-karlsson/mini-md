@@ -7,11 +7,9 @@ var markdownItCheckbox = require('markdown-it-checkbox');
 var markdownItAttrs = require('markdown-it-attrs');
 var markdownitAnchor = require('markdown-it-anchor');
 var express = require('express');
-var path = require('path');
-var url = require('url');
 var fs = require('fs');
+var path = require('path');
 
-var _documentCurrentScript = typeof document !== 'undefined' ? document.currentScript : null;
 class Template {
   _name;
   _content;
@@ -98,6 +96,9 @@ var projectConfig = {
 	Assets: Assets
 };
 
+const miniMdLocation = path.dirname(process.argv[1]);
+process.cwd();
+
 /**
  * Handles all IO operations
  */
@@ -154,14 +155,7 @@ class IO {
    * @type {string}
    * @private
    */
-  __filename = url.fileURLToPath((typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.src || new URL('index.cjs', document.baseURI).href)));
-
-  /**
-   * The value of __dirname for the package
-   * @type {string}
-   * @private
-   */
-  _projectDirPath = path.join(path.dirname(this.__filename), "..");
+  _projectDirPath = miniMdLocation;
 
   constructor() {
     this._userDirPath = this.findCallerDir();
@@ -175,10 +169,7 @@ class IO {
    * @returns {string}
    */
   findCallerDir() {
-    const projectRoot = this._projectDirPath
-      .split("node_modules")[0]
-      .slice(0, -1);
-    return projectRoot;
+    return process.cwd();
   }
 
   /**

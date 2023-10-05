@@ -1,8 +1,10 @@
 import defaultConfig from "../config/default.json" assert { type: "json" };
 import projectConfig from "../config/project.json" assert { type: "json" };
-import path from "path";
-import { fileURLToPath } from "url";
 import fs from "fs";
+import path from "path";
+
+const miniMdLocation = path.dirname(process.argv[1]);
+const userLocation = process.cwd();
 
 /**
  * Handles all IO operations
@@ -60,14 +62,7 @@ export default class IO {
    * @type {string}
    * @private
    */
-  __filename = fileURLToPath(import.meta.url);
-
-  /**
-   * The value of __dirname for the package
-   * @type {string}
-   * @private
-   */
-  _projectDirPath = path.join(path.dirname(this.__filename), "..");
+  _projectDirPath = miniMdLocation;
 
   constructor() {
     this._userDirPath = this.findCallerDir();
@@ -81,10 +76,7 @@ export default class IO {
    * @returns {string}
    */
   findCallerDir() {
-    const projectRoot = this._projectDirPath
-      .split("node_modules")[0]
-      .slice(0, -1);
-    return projectRoot;
+    return process.cwd();
   }
 
   /**

@@ -47,9 +47,7 @@ export default class IO {
         };
         Scripts: {
             dir: string;
-            path: string; /**
-             * Handles all IO operations
-             */
+            path: string;
         };
         Components: {
             dir: string;
@@ -75,9 +73,7 @@ export default class IO {
         };
         Scripts: {
             dir: string;
-            path: string; /**
-             * Handles all IO operations
-             */
+            path: string;
         };
         Components: {
             dir: string;
@@ -88,12 +84,6 @@ export default class IO {
             path: string;
         };
     };
-    /**
-     * The value of __dirname for the package
-     * @type {string}
-     * @private
-     */
-    private __filename;
     /**
      * The value of __dirname for the package
      * @type {string}
@@ -153,9 +143,7 @@ export default class IO {
         };
         Scripts: {
             dir: string;
-            path: string; /**
-             * Handles all IO operations
-             */
+            path: string;
         };
         Components: {
             dir: string;
@@ -183,9 +171,7 @@ export default class IO {
         };
         Scripts: {
             dir: string;
-            path: string; /**
-             * Handles all IO operations
-             */
+            path: string;
         };
         Components: {
             dir: string;
@@ -218,9 +204,7 @@ export default class IO {
         };
         Scripts: {
             dir: string;
-            path: string; /**
-             * Handles all IO operations
-             */
+            path: string;
         };
         Components: {
             dir: string;
@@ -248,9 +232,7 @@ export default class IO {
         };
         Scripts: {
             dir: string;
-            path: string; /**
-             * Handles all IO operations
-             */
+            path: string;
         };
         Components: {
             dir: string;
@@ -279,9 +261,7 @@ export default class IO {
         };
         Scripts: {
             dir: string;
-            path: string; /**
-             * Handles all IO operations
-             */
+            path: string;
         };
         Components: {
             dir: string;
