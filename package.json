@@ -1,7 +1,7 @@
 {
   "name": "mini-md",
   "version": "1.0.0",
-  "description": "A minimalist markdown website",
+  "description": "A minimalist markdown engine built on express and markdown-it",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -14,8 +14,21 @@
     "prepublish": "npm run generate-types"
   },
   "bin": "./bin.js",
-  "keywords": [],
+  "keywords": [
+    "markdown",
+    "express",
+    "markdown-it",
+    "markdown-it-anchor",
+    "markdown-it-attrs",
+    "markdown-it-checkbox",
+    "mini-md"
+  ],
   "author": "Frodi Karlsson",
+  "homepage": "https://github.com/frodi-karlsson/mini-md#readme",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:frodi-karlsson/mini-md.git"
+  },
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",

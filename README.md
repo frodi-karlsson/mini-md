@@ -47,4 +47,4 @@ npm run build-demo
 npm run demo
 ```
 
-This is largely built on markdown-it and express.js.
+There is no test script. Testing should probably be implemented at some point, but for now you can just run the demo and see if it works.
