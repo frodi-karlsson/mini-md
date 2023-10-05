@@ -11,7 +11,7 @@
     "build-demo": "npm run pack && npm run move && cd demo && npm remove mini-md && npm install mini-md-1.0.0.tgz && cd ..",
     "demo": "cd demo && npm start && cd ..",
     "generate-types": "tsc --declaration --emitDeclarationOnly --allowJs --checkJs --module esnext --target es6 --resolveJsonModule --allowSyntheticDefaultImports --moduleResolution node --outDir ./dist ./index.js",
-    "prepublish": "npm run generate-types"
+    "prepack": "npm run generate-types"
   },
   "bin": "./bin.js",
   "keywords": [

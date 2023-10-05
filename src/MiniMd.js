@@ -64,8 +64,11 @@ export default class MiniMD {
   }
 
   /**
+   * @typedef {("all" | "get" | "post" | "put" | "delete" | "patch" | "options" | "head" | "use")} Method
+   */
+  /**
    * Adds a path to the express app
-   * @param {method} method The method to add
+   * @param {Method} method The method to add
    * @param {string} path The path to add
    * @param {express.RequestHandler} handler The handler to add
    * @returns {void}
