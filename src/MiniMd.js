@@ -34,7 +34,7 @@ export default class MiniMD {
   /**
    * @typedef {Object} Handler
    * @property {string} path
-   * @property {express.RequestHandler=} handler
+   * @property {express.RequestHandler} handler
    * @property {string} method
    */
   /**
@@ -69,13 +69,13 @@ export default class MiniMD {
   /**
    * Adds a path to the express app
    * @param {Method} method The method to add
-   * @param {string} path The path to add
+   * @param {string | express.RequestHandler} path The path to add
    * @param {express.RequestHandler=} handler The handler to add
    * @returns {void}
    */
   addHandler(method, path, handler) {
     if (!handler) {
-      handler = path;
+      handler = /** @type {express.RequestHandler} */ (path);
       path = "*";
     }
     if (
@@ -94,16 +94,16 @@ export default class MiniMD {
       throw new Error("Invalid method: " + method);
     }
     const miniHandler = {
-      path,
-      handler,
-      method,
+      /** @type {string} */ path,
+      /** @type {express.RequestHandler} */ handler,
+      /** @type {Method} */ method,
     };
     this._handlers.push(miniHandler);
   }
 
   /**
    * Adds a use path to the express app
-   * @param {string} path The path to add
+   * @param {string | express.RequestHandler} path The path to add
    * @param {express.RequestHandler=} handler The handler to add
    */
   use(path, handler) {
@@ -112,7 +112,7 @@ export default class MiniMD {
 
   /**
    * Adds a get route to the express app
-   * @param {string} path The path to add
+   * @param {string | express.RequestHandler} path The path to add
    * @param {express.RequestHandler=} handler The handler to add
    */
   get(path, handler) {
@@ -121,7 +121,7 @@ export default class MiniMD {
 
   /**
    * Adds a post route to the express app
-   * @param {string} path The path to add
+   * @param {string | express.RequestHandler} path The path to add
    * @param {express.RequestHandler=} handler The handler to add
    */
   post(path, handler) {
@@ -130,7 +130,7 @@ export default class MiniMD {
 
   /**
    * Adds a put route to the express app
-   * @param {string} path The path to add
+   * @param {string | express.RequestHandler} path The path to add
    * @param {express.RequestHandler=} handler The handler to add
    */
   put(path, handler) {
@@ -139,7 +139,7 @@ export default class MiniMD {
 
   /**
    * Adds a delete route to the express app
-   * @param {string} path The path to add
+   * @param {string | express.RequestHandler} path The path to add
    * @param {express.RequestHandler=} handler The handler to add
    */
   delete(path, handler) {
@@ -148,7 +148,7 @@ export default class MiniMD {
 
   /**
    * Adds a patch route to the express app
-   * @param {string} path The path to add
+   * @param {string | express.RequestHandler} path The path to add
    * @param {express.RequestHandler=} handler The handler to add
    */
   patch(path, handler) {
@@ -157,7 +157,7 @@ export default class MiniMD {
 
   /**
    * Adds a options handler to the express app
-   * @param {string} path The path to add
+   * @param {string | express.RequestHandler} path The path to add
    * @param {express.RequestHandler=} handler The handler to add
    */
   options(path, handler) {
@@ -166,7 +166,7 @@ export default class MiniMD {
 
   /**
    * Adds a head handler to the express app
-   * @param {string} path The path to add
+   * @param {string | express.RequestHandler} path The path to add
    * @param {express.RequestHandler=} handler The handler to add
    */
   head(path, handler) {
@@ -175,7 +175,7 @@ export default class MiniMD {
 
   /**
    * Adds a all handler to the express app
-   * @param {string} path The path to add
+   * @param {string | express.RequestHandler} path The path to add
    * @param {express.RequestHandler=} handler The handler to add
    */
   all(path, handler) {

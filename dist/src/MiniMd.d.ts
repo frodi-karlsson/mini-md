@@ -26,7 +26,7 @@ export default class MiniMD {
     /**
      * @typedef {Object} Handler
      * @property {string} path
-     * @property {express.RequestHandler=} handler
+     * @property {express.RequestHandler} handler
      * @property {string} method
      */
     /**
@@ -34,7 +34,7 @@ export default class MiniMD {
      */
     _handlers: {
         path: string;
-        handler?: express.RequestHandler;
+        handler: express.RequestHandler;
         method: string;
     }[];
     /**
@@ -53,65 +53,65 @@ export default class MiniMD {
     /**
      * Adds a path to the express app
      * @param {Method} method The method to add
-     * @param {string} path The path to add
+     * @param {string | express.RequestHandler} path The path to add
      * @param {express.RequestHandler=} handler The handler to add
      * @returns {void}
      */
-    addHandler(method: "all" | "head" | "use" | "options" | "get" | "post" | "put" | "delete" | "patch", path: string, handler?: express.RequestHandler): void;
+    addHandler(method: "all" | "head" | "use" | "options" | "get" | "post" | "put" | "delete" | "patch", path: string | express.RequestHandler, handler?: express.RequestHandler): void;
     /**
      * Adds a use path to the express app
-     * @param {string} path The path to add
+     * @param {string | express.RequestHandler} path The path to add
      * @param {express.RequestHandler=} handler The handler to add
      */
-    use(path: string, handler?: express.RequestHandler): void;
+    use(path: string | express.RequestHandler, handler?: express.RequestHandler): void;
     /**
      * Adds a get route to the express app
-     * @param {string} path The path to add
+     * @param {string | express.RequestHandler} path The path to add
      * @param {express.RequestHandler=} handler The handler to add
      */
-    get(path: string, handler?: express.RequestHandler): void;
+    get(path: string | express.RequestHandler, handler?: express.RequestHandler): void;
     /**
      * Adds a post route to the express app
-     * @param {string} path The path to add
+     * @param {string | express.RequestHandler} path The path to add
      * @param {express.RequestHandler=} handler The handler to add
      */
-    post(path: string, handler?: express.RequestHandler): void;
+    post(path: string | express.RequestHandler, handler?: express.RequestHandler): void;
     /**
      * Adds a put route to the express app
-     * @param {string} path The path to add
+     * @param {string | express.RequestHandler} path The path to add
      * @param {express.RequestHandler=} handler The handler to add
      */
-    put(path: string, handler?: express.RequestHandler): void;
+    put(path: string | express.RequestHandler, handler?: express.RequestHandler): void;
     /**
      * Adds a delete route to the express app
-     * @param {string} path The path to add
+     * @param {string | express.RequestHandler} path The path to add
      * @param {express.RequestHandler=} handler The handler to add
      */
-    delete(path: string, handler?: express.RequestHandler): void;
+    delete(path: string | express.RequestHandler, handler?: express.RequestHandler): void;
     /**
      * Adds a patch route to the express app
-     * @param {string} path The path to add
+     * @param {string | express.RequestHandler} path The path to add
      * @param {express.RequestHandler=} handler The handler to add
      */
-    patch(path: string, handler?: express.RequestHandler): void;
+    patch(path: string | express.RequestHandler, handler?: express.RequestHandler): void;
     /**
      * Adds a options handler to the express app
-     * @param {string} path The path to add
+     * @param {string | express.RequestHandler} path The path to add
      * @param {express.RequestHandler=} handler The handler to add
      */
-    options(path: string, handler?: express.RequestHandler): void;
+    options(path: string | express.RequestHandler, handler?: express.RequestHandler): void;
     /**
      * Adds a head handler to the express app
-     * @param {string} path The path to add
+     * @param {string | express.RequestHandler} path The path to add
      * @param {express.RequestHandler=} handler The handler to add
      */
-    head(path: string, handler?: express.RequestHandler): void;
+    head(path: string | express.RequestHandler, handler?: express.RequestHandler): void;
     /**
      * Adds a all handler to the express app
-     * @param {string} path The path to add
+     * @param {string | express.RequestHandler} path The path to add
      * @param {express.RequestHandler=} handler The handler to add
      */
-    all(path: string, handler?: express.RequestHandler): void;
+    all(path: string | express.RequestHandler, handler?: express.RequestHandler): void;
     /**
      * Serves the express app
      * @param {number} port The port to serve on
