@@ -65,20 +65,46 @@ export default class MiniMD {
 
   /**
    * Adds a path to the express app
+   * @param {method} method The method to add
    * @param {string} path The path to add
    * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
    */
-  use(path, handler) {
+  addHandler(method, path, handler) {
     if (!handler) {
       handler = path;
       path = "*";
     }
+    if (
+      ![
+        "all",
+        "get",
+        "post",
+        "put",
+        "delete",
+        "patch",
+        "options",
+        "head",
+        "use",
+      ].includes(method)
+    ) {
+      throw new Error("Invalid method: " + method);
+    }
     const miniHandler = {
       path,
       handler,
-      method: "use",
+      method,
     };
     this._handlers.push(miniHandler);
+  }
+
+  /**
+   * Adds a use path to the express app
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   */
+  use(path, handler) {
+    this.addHandler("use", path, handler);
   }
 
   /**
@@ -87,12 +113,7 @@ export default class MiniMD {
    * @param {express.RequestHandler} handler The handler to add
    */
   get(path, handler) {
-    const miniHandler = {
-      path,
-      handler,
-      method: "get",
-    };
-    this._handlers.push(miniHandler);
+    this.addHandler("get", path, handler);
   }
 
   /**
@@ -101,12 +122,61 @@ export default class MiniMD {
    * @param {express.RequestHandler} handler The handler to add
    */
   post(path, handler) {
-    const miniHandler = {
-      path,
-      handler,
-      method: "post",
-    };
-    this._handlers.push(miniHandler);
+    this.addHandler("post", path, handler);
+  }
+
+  /**
+   * Adds a put route to the express app
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   */
+  put(path, handler) {
+    this.addHandler("put", path, handler);
+  }
+
+  /**
+   * Adds a delete route to the express app
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   */
+  delete(path, handler) {
+    this.addHandler("delete", path, handler);
+  }
+
+  /**
+   * Adds a patch route to the express app
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   */
+  patch(path, handler) {
+    this.addHandler("patch", path, handler);
+  }
+
+  /**
+   * Adds a options handler to the express app
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   */
+  options(path, handler) {
+    this.addHandler("options", path, handler);
+  }
+
+  /**
+   * Adds a head handler to the express app
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   */
+  head(path, handler) {
+    this.addHandler("head", path, handler);
+  }
+
+  /**
+   * Adds a all handler to the express app
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   */
+  all(path, handler) {
+    this.addHandler("all", path, handler);
   }
 
   /**

@@ -1,6 +1,6 @@
 This is a markdown server built on express.js and markdown-it.
 
-It is built to be used either as a standalone server or as an express view engine.
+It is built to be used as a standalone server.
 
 # Usage
 
