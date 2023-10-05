@@ -12,22 +12,6 @@ npm install https://github.com/frodi-karlsson/mini-md.git
 
 ### Implementing
 
-There are two ways to implement this. You can either use the express view engine or you can use it as a standalone module.
-
-- Express view engine
-```js
-import express from "express";
-import { MiniMd } from "mini-md";
-
-const app = express();
-const miniMd = new MiniMd();
-
-app.engine("md", miniMd.engine());
-// ... whatever express stuff you want to do
-```
-This is experimental and fairly untested. It also creates the config files (see below) even if you won't be using it. Config handling is planned to change.
-
-- Standalone module
 ```js
 import { MiniMd } from "mini-md";
 
@@ -42,7 +26,9 @@ miniMd.init();
 miniMd.listen(3000);
 ```
 
-As a standalone module, mini-md will serve files according to your config/(whatever name here).json file. A default config file is created when you install mini-md for reference.
+Mini-md will serve files according to your config/(whatever name here).json file.
+
+Run `npx mini-md` to create a default config file.
 
 # Development
 ### Install dependencies
@@ -57,7 +43,7 @@ npm start
 
 ### Run the demo
 ```bash
-npm run build
+npm run build-demo
 npm run demo
 ```
 

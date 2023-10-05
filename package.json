@@ -10,10 +10,12 @@
     "buildEnv": "node buildenv.js",
     "pack": "npm pack",
     "move": "mv mini-md-1.0.0.tgz ./demo/",
-    "build": "npm run buildEnv && npm run pack && npm run move && cd demo && npm remove mini-md && npm install mini-md-1.0.0.tgz && cd ..",
+    "build-demo": "npm run pack && npm run move && cd demo && npm remove mini-md && npm install mini-md-1.0.0.tgz && cd ..",
     "demo": "cd demo && npm start && cd ..",
+    "generate-types": "tsc --declaration --emitDeclarationOnly --allowJs --checkJs --module esnext --target es6 --resolveJsonModule --allowSyntheticDefaultImports --moduleResolution node --outDir ./dist ./index.js",
     "postinstall": "node buildenv.js > ./build-config-log.txt"
   },
+  "bin": "./bin.js",
   "keywords": [],
   "author": "Frodi Karlsson",
   "license": "MIT",
@@ -26,6 +28,8 @@
     "mkdirp": "^3.0.1"
   },
   "devDependencies": {
-    "jasmine": "^5.1.0"
+    "@types/node": "^20.8.2",
+    "jasmine": "^5.1.0",
+    "typescript": "^5.2.2"
   }
 }

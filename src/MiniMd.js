@@ -43,7 +43,7 @@ export default class MiniMD {
   _handlers = [];
   /**
    * The markdown parser
-   * @param {Express} app The express app
+   * @param {express.Application} app The express app
    */
 
   /**
@@ -151,7 +151,7 @@ export default class MiniMD {
   }
 
   initIO() {
-    this.io = new IO(this._other__dirname);
+    this.io = new IO();
   }
 
   initTemplates() {
@@ -192,7 +192,7 @@ export default class MiniMD {
   }
 
   /**
-   * Initialize the app for standalone use
+   * Initialize the app
    */
   init() {
     this.initIO();
@@ -202,27 +202,28 @@ export default class MiniMD {
   }
 
   /**
-   * Initialize the app for use as an express engine
-   */
-  initEngine() {
-    this.initIO();
-    this.initMd();
-  }
-
-  /**
    * Register the static assets with the express app
-   * @param {string} other__dirname The directory name of the app
-   * @param {Express} app The express app
    * @returns {void}
    */
   static() {
-    ["user", "project"].forEach((type) => {
-      ["Styles", "Components", "Templates", "Assets"].forEach((dir) => {
-        const configPath = this.io.getPath(dir, type);
-        const configDir = this.io.getDirPath(dir, type);
-        this.use(configPath, express.static(configDir));
-      });
-    });
+    [/** @type {const} */ ("user"), /** @type {const} */ ("project")].forEach(
+      (type) => {
+        /**
+         * @type {(keyof IO['_projectConfig'])[]}
+         */
+        const dirs = /** @type {(keyof IO['_projectConfig'])[]} */ ([
+          /** @type {const} */ ("Templates"),
+          /** @type {const} */ ("Styles"),
+          /** @type {const} */ ("Components"),
+          /** @type {const} */ ("Assets"),
+        ]);
+        dirs.forEach((dir) => {
+          const configPath = this.io.getPath(dir, type);
+          const configDir = this.io.getDirPath(dir, type);
+          this.use(configPath, express.static(configDir));
+        });
+      }
+    );
   }
 
   /**
@@ -254,25 +255,6 @@ export default class MiniMD {
   }
 
   /**
-   * Returns an engine version of mini-md
-   */
-  engine() {
-    this.initEngine();
-    function __express(filePath, options, callback) {
-      const templateFile = this.io.readFile(filePath);
-      const template = new Template(filePath, templateFile);
-      if (!this._templates) this._templates = [];
-      if (!this._templates.includes(template)) this._templates.push(template);
-      const parsedAttrs = this.parseAttrs(template.content);
-      const { dependencies, ...attrs } = parsedAttrs;
-      const [body, head] = this.renderTemplate(template, dependencies, attrs);
-      const document = this.makeDocument(head + body, attrs);
-      return callback(null, document);
-    }
-    return __express.bind(this);
-  }
-
-  /**
    * Injects the dependencies into the rendered template
    * @param {string} rendered The rendered template
    * @param {Dependency[]} dependencies The dependencies to inject
@@ -299,7 +281,7 @@ export default class MiniMD {
   /**
    * Builds the head of the rendered template
    * @param {string} components The components to add
-   * @param {string[]} styles The styles to add
+   * @param {string} styles The styles to add
    * @param {Attrs} attrs The attributes to add
    * @returns {string}
    */
@@ -387,6 +369,7 @@ export default class MiniMD {
   /**
    * Wraps the rendered template in a document
    * @param {string} rendered The rendered template
+   * @param {Attrs} attrs The parsed attributes
    */
   makeDocument(rendered, attrs) {
     return `<!DOCTYPE html>
@@ -397,7 +380,6 @@ export default class MiniMD {
 
   /**
    * Builds the component script tags
-   * @param {string} rendered The rendered template
    * @returns {string}
    */
   makeComponentTags() {
@@ -441,6 +423,7 @@ export default class MiniMD {
    * @typedef {Object} Dependency
    * @property {string} name The name of the dependency
    * @property {number} index The index of the dependency
+   * @property {number} length The length of the dependency
    */
   /**
    * Represents head attributes that are in a comment on the first line of the template

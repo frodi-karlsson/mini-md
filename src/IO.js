@@ -126,11 +126,12 @@ export default class IO {
     if (!config) {
       throw new Error("No config file found in " + configPath);
     }
-    const configContent = this.readFile(
-      path.join(this._userDirPath, "config", config)
+    const configContent = fs.readFileSync(
+      path.join(this._userDirPath, "config", config),
+      "utf8"
     );
-    this._config = defaultConfig;
-    this.assign(this._config, JSON.parse(configContent));
+    this._userConfig = defaultConfig;
+    this.assign(this._userConfig, JSON.parse(configContent));
     this._projectConfig = projectConfig;
   }
 
@@ -141,13 +142,19 @@ export default class IO {
    * @returns {void}
    */
   fillDirs() {
-    this._userDirs = {};
-    this._projectDirs = {};
-    Object.keys(this._config).forEach(
-      (key) => (this._userDirs[key] = this._config[key].dir)
+    const userDirs = {};
+    const projectDirs = {};
+    Object.keys(this._userConfig).forEach(
+      (key) => (userDirs[key] = this._userConfig[key].dir)
     );
     Object.keys(projectConfig).forEach(
-      (key) => (this._projectDirs[key] = projectConfig[key].dir)
+      (key) => (projectDirs[key] = projectConfig[key].dir)
+    );
+    this._userDirs = /** @type {Record<keyof defaultConfig, string>} */ (
+      userDirs
+    );
+    this._projectDirs = /** @type {Record<keyof defaultConfig, string>} */ (
+      projectDirs
     );
   }
 
@@ -158,13 +165,19 @@ export default class IO {
    * @returns {void}
    */
   fillPaths() {
-    this._userPaths = {};
-    this._projectPaths = {};
-    Object.keys(this._config).forEach(
-      (key) => (this._userPaths[key] = this._config[key].path)
+    const userPaths = {};
+    const projectPaths = {};
+    Object.keys(this._userConfig).forEach(
+      (key) => (userPaths[key] = this._userConfig[key].path)
     );
     Object.keys(projectConfig).forEach(
-      (key) => (this._projectPaths[key] = projectConfig[key].path)
+      (key) => (projectPaths[key] = projectConfig[key].path)
+    );
+    this._userPaths = /** @type {Record<keyof defaultConfig, string>} */ (
+      userPaths
+    );
+    this._projectPaths = /** @type {Record<keyof defaultConfig, string>} */ (
+      projectPaths
     );
   }
 
@@ -269,17 +282,9 @@ export default class IO {
     const dirs = this[`_${type}Dirs`];
     const dirPath = this[`_${type}DirPath`];
     if (dirs[dir]) {
-      return this.readFile(path.join(dirPath, dirs[dir], file));
+      return fs.readFileSync(path.join(dirPath, dirs[dir], file), "utf8");
     } else {
       throw new Error("No directory found for " + dir);
     }
-  }
-
-  /**
-   * Simply returns the content of a file
-   * @param {string} file The file to read
-   */
-  readFile(file) {
-    return fs.readFileSync(file, "utf8");
   }
 }

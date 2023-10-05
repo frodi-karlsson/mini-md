@@ -5,7 +5,7 @@ export default class Template {
   /**
    * @constructor
    * @param {string} name The name of the template
-   * @param {string} path The path to the template
+   * @param {string} content The content of the template
    */
   constructor(name, content) {
     this._name = name;

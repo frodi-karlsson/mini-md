@@ -8,6 +8,7 @@ body {
 
 mini-md {
   height: fit-content;
+  overflow-x: hidden;
   display: grid;
   grid-template-columns: 1fr;
 }
