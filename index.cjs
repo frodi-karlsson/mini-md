@@ -1,4 +1,4 @@
-const { MiniMD, Template } = require("./src/index.js");
+const { MiniMD, Template } = require("./index.js");
 module.exports = {
   MiniMD,
   Template,
