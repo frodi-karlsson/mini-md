@@ -128,25 +128,23 @@ export default class MiniMD {
      * @type {Template[]}
      */
     const templates = [];
-    const userTemplates = this.io.getFiles("Templates", "user").map((file) => {
-      const name = file.replace(".md", "");
-      return new Template(
-        name,
-        this.io.getFileContent(file, "Templates", "user")
-      );
-    });
-    const projectTemplates = this.io
-      .getFiles("Templates", "project")
-      .map((file) => {
-        const name = file.replace(".md", "");
-        return new Template(
-          name,
-          this.io.getFileContent(file, "Templates", "project")
-        );
-      });
-    templates.push(...userTemplates);
-    templates.push(...projectTemplates);
-    console.log("templates", templates);
+    [/** @type {const} */ ("user"), /** @type {const} */ ("project")].forEach(
+      (type) => {
+        const templateFiles = this.io.getFiles("Templates", type);
+        templateFiles.forEach((file) => {
+          const name = file.replace(".md", "");
+          const template = new Template(
+            name,
+            this.io.getFileContent(file, "Templates", type)
+          );
+          templates.push(template);
+        });
+      }
+    );
+    console.log(
+      "Found templates",
+      templates.map((template) => template.name).join(", ")
+    );
     return templates;
   }
 
@@ -180,7 +178,7 @@ export default class MiniMD {
       this.app.get(route, (req, res, next) => {
         const template = this.getTemplate(name);
         if (!template) {
-          console.warn("Could not find template: " + name);
+          console.warn("Could not find template:", name, "for route:", route);
           return next();
         }
         const parsedAttrs = this.parseAttrs(template.content);
@@ -250,7 +248,6 @@ export default class MiniMD {
     const components = this.makeComponentTags();
     const styles = this.makeStyleTags(attrs);
     const head = this.buildHead(components, styles, attrs);
-    console.log("rendered", wrapped);
     return [wrapped, head];
   }
 
@@ -455,7 +452,6 @@ export default class MiniMD {
    * @returns {Attrs} The parsed attributes
    */
   parseAttrs(template) {
-    console.log("Parsing attrs for template", template);
     const attrs = {
       dependencies: [],
     };
@@ -463,11 +459,9 @@ export default class MiniMD {
     let matches = [];
     let match;
     while ((match = regex.exec(template)) !== null) {
-      console.log("match", match);
       matches.push(match);
     }
     if (matches.length === 0) {
-      console.log("No matches");
       return attrs;
     }
 
@@ -478,7 +472,6 @@ export default class MiniMD {
         const key = attrMatch[1];
         const value = attrMatch[2];
         if (key === "template") {
-          console.log("found dependency", value);
           const endOfLine = template.indexOf("\n", macro.index);
           const dependency = {
             name: value,
@@ -487,7 +480,6 @@ export default class MiniMD {
           };
           attrs.dependencies.push(dependency);
         }
-        console.log("attr key", attrMatch[1], "value", attrMatch[2]);
         attrs[attrMatch[1]] = attrMatch[2];
       }
     });

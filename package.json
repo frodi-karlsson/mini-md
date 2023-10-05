@@ -5,15 +5,13 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "jasmine",
     "start": "node index.js",
-    "buildEnv": "node buildenv.js",
     "pack": "npm pack",
     "move": "mv mini-md-1.0.0.tgz ./demo/",
     "build-demo": "npm run pack && npm run move && cd demo && npm remove mini-md && npm install mini-md-1.0.0.tgz && cd ..",
     "demo": "cd demo && npm start && cd ..",
     "generate-types": "tsc --declaration --emitDeclarationOnly --allowJs --checkJs --module esnext --target es6 --resolveJsonModule --allowSyntheticDefaultImports --moduleResolution node --outDir ./dist ./index.js",
-    "postinstall": "node buildenv.js > ./build-config-log.txt"
+    "prepublish": "npm run generate-types"
   },
   "bin": "./bin.js",
   "keywords": [],
@@ -29,7 +27,6 @@
   },
   "devDependencies": {
     "@types/node": "^20.8.2",
-    "jasmine": "^5.1.0",
     "typescript": "^5.2.2"
   }
 }
