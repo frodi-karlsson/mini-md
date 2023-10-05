@@ -181,10 +181,8 @@ export default class IO {
    * @param {string} dirPath The path to read
    */
   readDirRecursive(dirPath, originalPath = dirPath, files = []) {
-    console.log("Reading dir", dirPath);
     fs.readdirSync(dirPath, { withFileTypes: true }).forEach((dirent) => {
       if (dirent.isDirectory()) {
-        console.log("Found directory", dirent.name);
         files = this.readDirRecursive(
           path.join(dirPath, dirent.name),
           originalPath,
