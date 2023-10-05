@@ -185,7 +185,7 @@ export default class MiniMD {
   /**
    * Serves the express app
    * @param {number} port The port to serve on
-   * @param {() => void} onListen The callback to run when the server starts listening
+   * @param {(() => void)=} onListen The callback to run when the server starts listening
    * @returns {void}
    */
   listen(port, onListen) {
