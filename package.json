@@ -23,6 +23,15 @@
     "markdown-it-checkbox",
     "mini-md"
   ],
+  "files": [
+    "index.js",
+    "dist",
+    "bin.js",
+    "src",
+    "README.md",
+    "LICENSE",
+    "config"
+  ],
   "author": "Frodi Karlsson",
   "homepage": "https://github.com/frodi-karlsson/mini-md#readme",
   "repository": {
