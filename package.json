@@ -6,12 +6,15 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "pack": "npm pack",
-    "move": "mv mini-md-1.0.2.tgz ./demo/",
-    "build-demo": "npm run pack && npm run move && cd demo && npm remove mini-md && npm install mini-md-1.0.0.tgz && cd ..",
-    "demo": "cd demo && npm start && cd ..",
+    "rollup": "npx rollup -c",
     "generate-types": "tsc --declaration --emitDeclarationOnly --allowJs --checkJs --module nodenext --target es6 --resolveJsonModule --allowSyntheticDefaultImports --moduleResolution nodenext --outDir dist ./index.js",
-    "prepack": "npm run generate-types"
+    "build": "npm run rollup && npm run generate-types",
+    "pack": "npm run build && npm pack",
+    "move": "mv mini-md-1.0.2.tgz ./demo/",
+    "reinstall-demo": "cd demo && npm remove mini-md && npm install mini-md-1.0.2.tgz && cd ..",
+    "build-demo": "npm run pack && npm run move && npm run reinstall-demo",
+    "demo": "cd demo && npm start && cd ..",
+    "prepack": "npm run build"
   },
   "bin": "./bin.js",
   "keywords": [
@@ -54,7 +57,9 @@
     "mkdirp": "^3.0.1"
   },
   "devDependencies": {
+    "@rollup/plugin-json": "^6.0.0",
     "@types/node": "^20.8.2",
+    "rollup": "^3.29.4",
     "typescript": "^5.2.2"
   }
 }
