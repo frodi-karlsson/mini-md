@@ -565,6 +565,7 @@ class MiniMD {
    * @returns {void}
    */
   listen(port, onListen) {
+    this.init();
     this.app.listen(port, onListen);
   }
 
@@ -622,6 +623,10 @@ class MiniMD {
     this._handlers.forEach((handler) => {
       this.app[handler.method](handler.path, handler.handler);
     });
+    if (!this._routes) {
+      console.warn("No routes added. See MiniMD.addRoutes(), skipping...");
+      return;
+    }
     this._routes.forEach(([route, name, method]) => {
       console.log("adding", method, "route", route, "for template", name);
       this.app[method ?? "get"](route, (req, res, next) => {

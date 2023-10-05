@@ -16,13 +16,18 @@ npm i mini-md
 import { MiniMd } from "mini-md";
 
 const miniMd = new MiniMd();
-miniMd.init();
-/**
+/*
  * Here you can do standard express stuff via miniMd:
  * miniMd.get("/some/path", (req, res) => {
  *    res.send("Hello world!");
  * });
+ *
+ * You should probably be using miniMd.addRoutes([path, templateName, method = "get"][])
+ * instead for adding routes.
+ *
+ * You can also use miniMd.use() to add middleware.
  */
+miniMd.use(express.static("public"));
 miniMd.listen(3000);
 ```
 

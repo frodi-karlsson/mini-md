@@ -24,8 +24,6 @@ const routes = [
 
 miniMd.addRoutes(routes);
 
-miniMd.init();
-
 const port = 3000;
 
 miniMd.listen(port, () => {

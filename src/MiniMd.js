@@ -188,6 +188,7 @@ export default class MiniMD {
    * @returns {void}
    */
   listen(port, onListen) {
+    this.init();
     this.app.listen(port, onListen);
   }
 
@@ -246,9 +247,8 @@ export default class MiniMD {
       this.app[handler.method](handler.path, handler.handler);
     });
     if (!this._routes) {
-      throw new Error(
-        "No routes specified. addRoutes() must be called before init()"
-      );
+      console.warn("No routes added. See MiniMD.addRoutes(), skipping...");
+      return;
     }
     this._routes.forEach(([route, name, method]) => {
       console.log("adding", method, "route", route, "for template", name);
