@@ -24,7 +24,9 @@
     "markdown-it-anchor",
     "markdown-it-attrs",
     "markdown-it-checkbox",
-    "mini-md"
+    "mini-md",
+    "esm",
+    "cjs"
   ],
   "files": [
     "index.js",
