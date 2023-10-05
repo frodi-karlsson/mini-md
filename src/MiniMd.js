@@ -56,8 +56,8 @@ export default class MiniMD {
    * @param {express.Application} app The express app
    */
   /**
-   * Adds the given routes
-   * @param {Route[]} routes The routes to add
+   * Adds the given routes to the app.
+   * @param {Route[]} routes These are in the format [ route, templateName, method = "get" ]
    * @returns {void}
    */
   addRoutes(routes) {
@@ -73,7 +73,8 @@ export default class MiniMD {
   }
 
   /**
-   * Adds a path to the express app
+   * Adds a middleware handler to the express app
+   * @private
    * @param {Method} method The method to add
    * @param {string | express.RequestHandler} path The path to add
    * @param {express.RequestHandler=} handler The handler to add
@@ -108,81 +109,189 @@ export default class MiniMD {
   }
 
   /**
-   * Adds a use path to the express app
+   * @overload
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * @overload
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * Adds a use handler to the express app
    * @param {string | express.RequestHandler} path The path to add
-   * @param {express.RequestHandler=} handler The handler to add
+   * @param {express.RequestHandler=} handler
+   * @returns {void}
    */
   use(path, handler) {
     this.addHandler("use", path, handler);
   }
 
   /**
-   * Adds a get route to the express app
+   * @overload
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * @overload
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * Adds a get handler to the express app
    * @param {string | express.RequestHandler} path The path to add
-   * @param {express.RequestHandler=} handler The handler to add
+   * @param {express.RequestHandler=} handler
+   * @returns {void}
    */
   get(path, handler) {
     this.addHandler("get", path, handler);
   }
 
   /**
-   * Adds a post route to the express app
+   * @overload
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * @overload
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * Adds a post handler to the express app
    * @param {string | express.RequestHandler} path The path to add
-   * @param {express.RequestHandler=} handler The handler to add
+   * @param {express.RequestHandler=} handler
+   * @returns {void}
    */
   post(path, handler) {
     this.addHandler("post", path, handler);
   }
 
   /**
-   * Adds a put route to the express app
+   * @overload
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * @overload
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * Adds a put handler to the express app
    * @param {string | express.RequestHandler} path The path to add
-   * @param {express.RequestHandler=} handler The handler to add
+   * @param {express.RequestHandler=} handler
+   * @returns {void}
    */
   put(path, handler) {
     this.addHandler("put", path, handler);
   }
 
   /**
-   * Adds a delete route to the express app
+   * @overload
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * @overload
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * Adds a delete handler to the express app
    * @param {string | express.RequestHandler} path The path to add
-   * @param {express.RequestHandler=} handler The handler to add
+   * @param {express.RequestHandler=} handler
+   * @returns {void}
    */
   delete(path, handler) {
     this.addHandler("delete", path, handler);
   }
 
   /**
-   * Adds a patch route to the express app
+   * @overload
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * @overload
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * Adds a patch  handler to the express app
    * @param {string | express.RequestHandler} path The path to add
-   * @param {express.RequestHandler=} handler The handler to add
+   * @param {express.RequestHandler=} handler
+   * @returns {void}
    */
   patch(path, handler) {
     this.addHandler("patch", path, handler);
   }
 
   /**
-   * Adds a options handler to the express app
+   * @overload
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * @overload
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * Adds an options handler to the express app
    * @param {string | express.RequestHandler} path The path to add
-   * @param {express.RequestHandler=} handler The handler to add
+   * @param {express.RequestHandler=} handler
+   * @returns {void}
    */
   options(path, handler) {
     this.addHandler("options", path, handler);
   }
 
   /**
+   * @overload
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * @overload
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
    * Adds a head handler to the express app
    * @param {string | express.RequestHandler} path The path to add
-   * @param {express.RequestHandler=} handler The handler to add
+   * @param {express.RequestHandler=} handler
+   * @returns {void}
    */
   head(path, handler) {
     this.addHandler("head", path, handler);
   }
 
   /**
-   * Adds a all handler to the express app
+   * @overload
+   * @param {string} path The path to add
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * @overload
+   * @param {express.RequestHandler} handler The handler to add
+   * @returns {void}
+   */
+  /**
+   * Adds an all handler to the express app
    * @param {string | express.RequestHandler} path The path to add
-   * @param {express.RequestHandler=} handler The handler to add
+   * @param {express.RequestHandler=} handler
+   * @returns {void}
    */
   all(path, handler) {
     this.addHandler("all", path, handler);
