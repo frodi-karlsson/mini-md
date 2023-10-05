@@ -41,6 +41,13 @@ export default class MiniMD {
         method: "all" | "head" | "use" | "options" | "get" | "post" | "put" | "delete" | "patch";
     }[];
     /**
+     * @typedef {(app: express.Application) => void} Modifier
+     */
+    /**
+     * @type {Modifier[]}
+     */
+    _modifiers: ((app: express.Application) => void)[];
+    /**
      * The markdown parser
      * @param {express.Application} app The express app
      */
@@ -113,6 +120,11 @@ export default class MiniMD {
      */
     all(path: string | express.RequestHandler, handler?: express.RequestHandler): void;
     /**
+     * Allows modification of the express app when it is initialized
+     * @param {Modifier} callback The callback to run when the express app is initialized
+     */
+    modify(callback: (app: express.Application) => void): void;
+    /**
      * Serves the express app
      * @param {number} port The port to serve on
      * @param {(() => void)=} onListen The callback to run when the server starts listening
@@ -124,12 +136,32 @@ export default class MiniMD {
      * @returns {Template[]}
      */
     readTemplates(): Template[];
-    initIO(): void;
-    initTemplates(): void;
-    initMd(): void;
-    initApp(): void;
     /**
-     * Initialize the app
+     * Initialize the IO class
+     * @private
+     * @returns {void}
+     */
+    private initIO;
+    /**
+     * Initialize the templates
+     * @private
+     * @returns {void}
+     */
+    private initTemplates;
+    /**
+     * Initialize the markdown parser
+     * @private
+     * @returns {void}
+     */
+    private initMd;
+    /**
+     * Initialize the express app
+     * @private
+     * @returns {void}
+     */
+    private initApp;
+    /**
+     * Initialize mini-md. This is called automatically when you call MiniMD.listen()
      */
     init(): void;
     /**

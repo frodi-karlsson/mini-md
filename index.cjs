@@ -422,6 +422,13 @@ class MiniMD {
    */
   _handlers = [];
   /**
+   * @typedef {(app: express.Application) => void} Modifier
+   */
+  /**
+   * @type {Modifier[]}
+   */
+  _modifiers = [];
+  /**
    * The markdown parser
    * @param {express.Application} app The express app
    */
@@ -559,6 +566,14 @@ class MiniMD {
   }
 
   /**
+   * Allows modification of the express app when it is initialized
+   * @param {Modifier} callback The callback to run when the express app is initialized
+   */
+  modify(callback) {
+    this._modifiers.push(callback);
+  }
+
+  /**
    * Serves the express app
    * @param {number} port The port to serve on
    * @param {(() => void)=} onListen The callback to run when the server starts listening
@@ -598,14 +613,29 @@ class MiniMD {
     return templates;
   }
 
+  /**
+   * Initialize the IO class
+   * @private
+   * @returns {void}
+   */
   initIO() {
     this.io = new IO();
   }
 
+  /**
+   * Initialize the templates
+   * @private
+   * @returns {void}
+   */
   initTemplates() {
     this._templates = this.readTemplates();
   }
 
+  /**
+   * Initialize the markdown parser
+   * @private
+   * @returns {void}
+   */
   initMd() {
     this._md = new MarkdownIt({
       html: true,
@@ -617,9 +647,17 @@ class MiniMD {
     this._md.use(markdownitAnchor);
   }
 
+  /**
+   * Initialize the express app
+   * @private
+   * @returns {void}
+   */
   initApp() {
     this.app = express();
     this.static();
+    this._modifiers.forEach((modifier) => {
+      modifier(this.app);
+    });
     this._handlers.forEach((handler) => {
       this.app[handler.method](handler.path, handler.handler);
     });
@@ -644,7 +682,7 @@ class MiniMD {
   }
 
   /**
-   * Initialize the app
+   * Initialize mini-md. This is called automatically when you call MiniMD.listen()
    */
   init() {
     this.initIO();

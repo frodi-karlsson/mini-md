@@ -12,6 +12,8 @@ miniMd.use(
   })
 );
 
+miniMd.modify((app) => app.disable("x-powered-by"));
+
 const routes = [
   ["/", "index"],
   ["/syntax", "syntax"],
