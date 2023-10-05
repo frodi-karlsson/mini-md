@@ -1,6 +1,6 @@
 {
   "name": "mini-md",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A minimalist markdown engine built on express and markdown-it",
   "type": "module",
   "main": "index.js",
