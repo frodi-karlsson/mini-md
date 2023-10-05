@@ -5,6 +5,7 @@ import markdownitAnchor from "markdown-it-anchor";
 import Template from "./Template.js";
 import express from "express";
 import IO from "./IO.js";
+import Helpers from "./helpers.js";
 
 /**
  * Express engine for serving MiniMD templates
@@ -338,7 +339,7 @@ export default class MiniMD {
         });
       }
     );
-    console.log(
+    Helpers.success(
       "Found templates",
       templates.map((template) => template.name).join(", ")
     );
@@ -394,15 +395,14 @@ export default class MiniMD {
       this.app[handler.method](handler.path, handler.handler);
     });
     if (!this._routes) {
-      console.warn("No routes added. See MiniMD.addRoutes(), skipping...");
+      Helpers.warn("No routes added. See MiniMD.addRoutes(), skipping...");
       return;
     }
     this._routes.forEach(([route, name, method]) => {
-      console.log("adding", method, "route", route, "for template", name);
       this.app[method ?? "get"](route, (req, res, next) => {
         const template = this.getTemplate(name);
         if (!template) {
-          console.warn("Could not find template:", name, "for route:", route);
+          Helpers.error("Could not find template:", name, "for route:", route);
           return next();
         }
         const parsedAttrs = this.parseAttrs(template.content);
@@ -410,6 +410,14 @@ export default class MiniMD {
         const [body, head] = this.renderTemplate(template, dependencies, attrs);
         res.send(this.makeDocument(head + body, attrs));
       });
+      Helpers.success(
+        "added",
+        method ?? "get",
+        "route",
+        route,
+        "for template",
+        name
+      );
     });
   }
 
@@ -489,7 +497,7 @@ export default class MiniMD {
       const end = rendered.slice(dependency.index + iOffset + length);
       const template = this.getTemplate(dependency.name);
       if (!template) {
-        console.warn("Could not find template: " + dependency.name);
+        Helpers.warn("Could not find template: " + dependency.name);
         return;
       }
       const injected = start + template.content + end;

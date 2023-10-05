@@ -91,23 +91,11 @@ export default class IO {
      */
     private _projectDirPath;
     /**
-     * Finds the directory of the user's project
-     * @returns {string}
-     */
-    findCallerDir(): string;
-    /**
      * Checks that a file or directory exists
      * @param {string} checkPath The path to check
      * @returns {boolean}
      */
     exists(checkPath: string): boolean;
-    /**
-     * Recursively assigns the values of an object to another object
-     * @param {Record<string, any>} obj The object to assign to
-     * @param {Record<string, any>} values The values to assign
-     * @returns {void}
-     */
-    assign(obj: Record<string, any>, values: Record<string, any>): void;
     /**
      * Finds config file for the user's project. Should be located in {projectRoot}/config/*.json
      */

@@ -96,8 +96,55 @@ var projectConfig = {
 	Assets: Assets
 };
 
-const miniMdLocation = path.dirname(process.argv[1]);
-process.cwd();
+class Helpers {
+  /**
+   * Prints a warning to the console in yellow
+   * @param  {...any} data
+   */
+  static warn(...data) {
+    const ansiYellow = "\u001b[33m";
+    const ansiReset = "\u001b[0m";
+    console.warn(ansiYellow, ...data, ansiReset);
+  }
+
+  /**
+   * Prints a success message to the console in green
+   * @param  {...any} data
+   */
+  static success(...data) {
+    const ansiGreen = "\u001b[32m";
+    const ansiReset = "\u001b[0m";
+    console.log(ansiGreen, ...data, ansiReset);
+  }
+
+  /**
+   * Prints an error message to the console in red
+   * @param  {...any} data
+   */
+  static error(...data) {
+    const ansiRed = "\u001b[31m";
+    const ansiReset = "\u001b[0m";
+    console.error(ansiRed, ...data, ansiReset);
+  }
+
+  /**
+   * Recursively assigns the values of an object to another object
+   * @param {Record<string, any>} obj The object to assign to
+   * @param {Record<string, any>} values The values to assign
+   * @returns {void}
+   */
+  static assign(obj, values) {
+    for (const key in values) {
+      if (Array.isArray(values[key])) {
+        obj[key] = [...values[key]];
+      } else if (typeof values[key] === "object") {
+        this.assign(obj[key], values[key]);
+      } else {
+        obj[key] = values[key];
+      }
+    }
+  }
+}
 
 /**
  * Handles all IO operations
@@ -155,21 +202,14 @@ class IO {
    * @type {string}
    * @private
    */
-  _projectDirPath = miniMdLocation;
+  _projectDirPath;
 
   constructor() {
-    this._userDirPath = this.findCallerDir();
+    this._projectDirPath = path.join(process.cwd(), "node_modules", "mini-md");
+    this._userDirPath = process.cwd();
     this.findConfig();
     this.fillDirs();
     this.fillPaths();
-  }
-
-  /**
-   * Finds the directory of the user's project
-   * @returns {string}
-   */
-  findCallerDir() {
-    return process.cwd();
   }
 
   /**
@@ -181,24 +221,6 @@ class IO {
     const exists = fs.existsSync(checkPath);
 
     return exists;
-  }
-
-  /**
-   * Recursively assigns the values of an object to another object
-   * @param {Record<string, any>} obj The object to assign to
-   * @param {Record<string, any>} values The values to assign
-   * @returns {void}
-   */
-  assign(obj, values) {
-    for (const key in values) {
-      if (Array.isArray(values[key])) {
-        obj[key] = [...values[key]];
-      } else if (typeof values[key] === "object") {
-        this.assign(obj[key], values[key]);
-      } else {
-        obj[key] = values[key];
-      }
-    }
   }
 
   /**
@@ -216,7 +238,7 @@ class IO {
       "utf8"
     );
     this._userConfig = defaultConfig;
-    this.assign(this._userConfig, JSON.parse(configContent));
+    Helpers.assign(this._userConfig, JSON.parse(configContent));
     this._projectConfig = projectConfig;
   }
 
@@ -325,14 +347,17 @@ class IO {
    * @returns {string[]} The list of files
    */
   getFiles(dir, type = "user") {
+    if (dir === "Templates" && type === "project") {
+      return [];
+    }
     const dirs = this[`_${type}Dirs`];
     const dirPath = this[`_${type}DirPath`]; // _userDirPath or _projectDirPath
     if (dirs[dir]) {
       if (this.exists(path.join(dirPath, dirs[dir]))) {
         return this.readDirRecursive(path.join(dirPath, dirs[dir]));
       } else {
-        console.warn("Directory does not exist: " + dir, "in", type);
-        console.warn("Expected path:", path.join(dirPath, dirs[dir]));
+        Helpers.warn("Directory does not exist: " + dir, "in", type);
+        Helpers.warn("Expected path:", path.join(dirPath, dirs[dir]));
         return [];
       }
     } else {
@@ -706,7 +731,7 @@ class MiniMD {
         });
       }
     );
-    console.log(
+    Helpers.success(
       "Found templates",
       templates.map((template) => template.name).join(", ")
     );
@@ -762,15 +787,14 @@ class MiniMD {
       this.app[handler.method](handler.path, handler.handler);
     });
     if (!this._routes) {
-      console.warn("No routes added. See MiniMD.addRoutes(), skipping...");
+      Helpers.warn("No routes added. See MiniMD.addRoutes(), skipping...");
       return;
     }
     this._routes.forEach(([route, name, method]) => {
-      console.log("adding", method, "route", route, "for template", name);
       this.app[method ?? "get"](route, (req, res, next) => {
         const template = this.getTemplate(name);
         if (!template) {
-          console.warn("Could not find template:", name, "for route:", route);
+          Helpers.error("Could not find template:", name, "for route:", route);
           return next();
         }
         const parsedAttrs = this.parseAttrs(template.content);
@@ -778,6 +802,14 @@ class MiniMD {
         const [body, head] = this.renderTemplate(template, dependencies, attrs);
         res.send(this.makeDocument(head + body, attrs));
       });
+      Helpers.success(
+        "added",
+        method ?? "get",
+        "route",
+        route,
+        "for template",
+        name
+      );
     });
   }
 
@@ -857,7 +889,7 @@ class MiniMD {
       const end = rendered.slice(dependency.index + iOffset + length);
       const template = this.getTemplate(dependency.name);
       if (!template) {
-        console.warn("Could not find template: " + dependency.name);
+        Helpers.warn("Could not find template: " + dependency.name);
         return;
       }
       const injected = start + template.content + end;

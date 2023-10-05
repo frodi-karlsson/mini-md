@@ -2,9 +2,7 @@ import defaultConfig from "../config/default.json" assert { type: "json" };
 import projectConfig from "../config/project.json" assert { type: "json" };
 import fs from "fs";
 import path from "path";
-
-const miniMdLocation = path.dirname(process.argv[1]);
-const userLocation = process.cwd();
+import Helpers from "./helpers.js";
 
 /**
  * Handles all IO operations
@@ -62,21 +60,14 @@ export default class IO {
    * @type {string}
    * @private
    */
-  _projectDirPath = miniMdLocation;
+  _projectDirPath;
 
   constructor() {
-    this._userDirPath = this.findCallerDir();
+    this._projectDirPath = path.join(process.cwd(), "node_modules", "mini-md");
+    this._userDirPath = process.cwd();
     this.findConfig();
     this.fillDirs();
     this.fillPaths();
-  }
-
-  /**
-   * Finds the directory of the user's project
-   * @returns {string}
-   */
-  findCallerDir() {
-    return process.cwd();
   }
 
   /**
@@ -88,24 +79,6 @@ export default class IO {
     const exists = fs.existsSync(checkPath);
 
     return exists;
-  }
-
-  /**
-   * Recursively assigns the values of an object to another object
-   * @param {Record<string, any>} obj The object to assign to
-   * @param {Record<string, any>} values The values to assign
-   * @returns {void}
-   */
-  assign(obj, values) {
-    for (const key in values) {
-      if (Array.isArray(values[key])) {
-        obj[key] = [...values[key]];
-      } else if (typeof values[key] === "object") {
-        this.assign(obj[key], values[key]);
-      } else {
-        obj[key] = values[key];
-      }
-    }
   }
 
   /**
@@ -123,7 +96,7 @@ export default class IO {
       "utf8"
     );
     this._userConfig = defaultConfig;
-    this.assign(this._userConfig, JSON.parse(configContent));
+    Helpers.assign(this._userConfig, JSON.parse(configContent));
     this._projectConfig = projectConfig;
   }
 
@@ -218,7 +191,6 @@ export default class IO {
           files
         );
       } else {
-        console.log("Found file", dirent.name);
         files.push(path.join(dirPath.replace(originalPath, ""), dirent.name));
       }
     });
@@ -232,14 +204,17 @@ export default class IO {
    * @returns {string[]} The list of files
    */
   getFiles(dir, type = "user") {
+    if (dir === "Templates" && type === "project") {
+      return [];
+    }
     const dirs = this[`_${type}Dirs`];
     const dirPath = this[`_${type}DirPath`]; // _userDirPath or _projectDirPath
     if (dirs[dir]) {
       if (this.exists(path.join(dirPath, dirs[dir]))) {
         return this.readDirRecursive(path.join(dirPath, dirs[dir]));
       } else {
-        console.warn("Directory does not exist: " + dir, "in", type);
-        console.warn("Expected path:", path.join(dirPath, dirs[dir]));
+        Helpers.warn("Directory does not exist: " + dir, "in", type);
+        Helpers.warn("Expected path:", path.join(dirPath, dirs[dir]));
         return [];
       }
     } else {
