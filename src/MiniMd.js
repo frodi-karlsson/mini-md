@@ -245,6 +245,11 @@ export default class MiniMD {
     this._handlers.forEach((handler) => {
       this.app[handler.method](handler.path, handler.handler);
     });
+    if (!this._routes) {
+      throw new Error(
+        "No routes specified. addRoutes() must be called before init()"
+      );
+    }
     this._routes.forEach(([route, name, method]) => {
       console.log("adding", method, "route", route, "for template", name);
       this.app[method ?? "get"](route, (req, res, next) => {
