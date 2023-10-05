@@ -737,8 +737,8 @@ declare module "src/MiniMd" {
         };
     }
     import MarkdownIt from "markdown-it";
-    import IO from "src/IO";
-    import Template from "src/Template";
+    import IO from "src/IO.js";
+    import Template from "src/Template.js";
 }
 declare module "index" {
     namespace _default {
@@ -746,7 +746,7 @@ declare module "index" {
         export { Template };
     }
     export default _default;
-    import MiniMD from "src/MiniMd";
-    import Template from "src/Template";
+    import MiniMD from "src/MiniMd.js";
+    import Template from "src/Template.js";
     export { MiniMD, Template };
 }

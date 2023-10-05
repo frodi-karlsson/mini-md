@@ -10,7 +10,7 @@
     "move": "mv mini-md-1.0.2.tgz ./demo/",
     "build-demo": "npm run pack && npm run move && cd demo && npm remove mini-md && npm install mini-md-1.0.0.tgz && cd ..",
     "demo": "cd demo && npm start && cd ..",
-    "generate-types": "tsc --declaration --emitDeclarationOnly --allowJs --checkJs --module esnext --target es6 --resolveJsonModule --allowSyntheticDefaultImports --moduleResolution node --outFile ./index.d.ts ./index.js",
+    "generate-types": "tsc --declaration --emitDeclarationOnly --allowJs --checkJs --module nodenext --target es6 --resolveJsonModule --allowSyntheticDefaultImports --moduleResolution nodenext --outFile ./index.d.ts ./index.js",
     "prepack": "npm run generate-types"
   },
   "bin": "./bin.js",
@@ -25,12 +25,18 @@
   ],
   "files": [
     "index.js",
+    "index.cjs",
     "bin.js",
     "src",
+    "index.d.ts",
     "README.md",
     "LICENSE",
     "config"
   ],
+  "exports": {
+    "import": "./index.js",
+    "require": "./index.cjs"
+  },
   "types": "./index.d.ts",
   "author": "Frodi Karlsson",
   "homepage": "https://github.com/frodi-karlsson/mini-md#readme",
