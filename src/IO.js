@@ -1,3 +1,4 @@
+"use strict";
 import defaultConfig from "../config/default.json" assert { type: "json" };
 import projectConfig from "../config/project.json" assert { type: "json" };
 import fs from "fs";

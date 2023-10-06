@@ -1,3 +1,4 @@
+"use strict";
 import MarkdownIt from "markdown-it";
 import markdownItCheckbox from "markdown-it-checkbox";
 import markdownItAttrs from "markdown-it-attrs";

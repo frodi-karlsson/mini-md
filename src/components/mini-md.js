@@ -1,3 +1,4 @@
+"use strict";
 /**
  * A custom tag that wraps a page of markdown content
  */

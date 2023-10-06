@@ -1,3 +1,4 @@
+"use strict";
 import MiniMD from "./src/MiniMd.js";
 import Template from "./src/Template.js";
 

@@ -6,5 +6,6 @@ export default {
     file: "index.cjs",
     format: "cjs",
   },
+  exports: "named",
   plugins: [json()],
 };
