@@ -245,6 +245,19 @@ export default class MiniMD {
         twitterImageAlt?: string;
         dependencies?: {
             /**
+             * The injections to inject into the template.
+             */
+            injections: {
+                /**
+                 * The name of the injection
+                 */
+                name: string;
+                /**
+                 * The value of the injection
+                 */
+                value: string;
+            }[];
+            /**
              * The name of the dependency
              */
             name: string;
@@ -288,6 +301,19 @@ export default class MiniMD {
      */
     renderTemplate(template: Template, dependencies: {
         /**
+         * The injections to inject into the template.
+         */
+        injections: {
+            /**
+             * The name of the injection
+             */
+            name: string;
+            /**
+             * The value of the injection
+             */
+            value: string;
+        }[];
+        /**
          * The name of the dependency
          */
         name: string;
@@ -320,6 +346,19 @@ export default class MiniMD {
         twitterImageAlt?: string;
         dependencies?: {
             /**
+             * The injections to inject into the template.
+             */
+            injections: {
+                /**
+                 * The name of the injection
+                 */
+                name: string;
+                /**
+                 * The value of the injection
+                 */
+                value: string;
+            }[];
+            /**
              * The name of the dependency
              */
             name: string;
@@ -340,6 +379,19 @@ export default class MiniMD {
      * @returns {[string, string[]]} The rendered template and the tags to add to the head
      */
     addDependencies(rendered: string, dependencies: {
+        /**
+         * The injections to inject into the template.
+         */
+        injections: {
+            /**
+             * The name of the injection
+             */
+            name: string;
+            /**
+             * The value of the injection
+             */
+            value: string;
+        }[];
         /**
          * The name of the dependency
          */
@@ -382,6 +434,19 @@ export default class MiniMD {
         ogSiteName?: string;
         twitterImageAlt?: string;
         dependencies?: {
+            /**
+             * The injections to inject into the template.
+             */
+            injections: {
+                /**
+                 * The name of the injection
+                 */
+                name: string;
+                /**
+                 * The value of the injection
+                 */
+                value: string;
+            }[];
             /**
              * The name of the dependency
              */
@@ -428,6 +493,19 @@ export default class MiniMD {
         twitterImageAlt?: string;
         dependencies?: {
             /**
+             * The injections to inject into the template.
+             */
+            injections: {
+                /**
+                 * The name of the injection
+                 */
+                name: string;
+                /**
+                 * The value of the injection
+                 */
+                value: string;
+            }[];
+            /**
              * The name of the dependency
              */
             name: string;
@@ -457,8 +535,15 @@ export default class MiniMD {
      */
     makeScriptTags(template: Template): string;
     /**
+     * Represents an injection to inject into a template. {{ name }} will be replaced with the value
+     * @typedef {Object} Injection
+     * @property {string} name The name of the injection
+     * @property {string} value The value of the injection
+     */
+    /**
      * Represents a dependency on another template
      * @typedef {Object} Dependency
+     * @property {Injection[]} injections The injections to inject into the template.
      * @property {string} name The name of the dependency
      * @property {number} index The index of the dependency
      * @property {number} length The length of the dependency
@@ -512,6 +597,19 @@ export default class MiniMD {
         ogSiteName?: string;
         twitterImageAlt?: string;
         dependencies?: {
+            /**
+             * The injections to inject into the template.
+             */
+            injections: {
+                /**
+                 * The name of the injection
+                 */
+                name: string;
+                /**
+                 * The value of the injection
+                 */
+                value: string;
+            }[];
             /**
              * The name of the dependency
              */

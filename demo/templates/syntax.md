@@ -26,6 +26,22 @@ This is used for [metadata](/SEO) and [schemes](/schemes), but also for injectin
 [//]: # (template="navbar")
 ```
 
+Templates can also be injected into. This looks like this:
+
+```md
+[//]: # (template="template" key="value")
+```
+
+Then in the template you can use the key to inject the value. For example:
+
+```html
+# {{key}}
+```
+
+Thanks, angular.
+
+[//]: # (template="injection" key="value")
+
 ### Markdown-it-attrs
 
 Mini-md uses the markdown-it-attrs plugin to add classes and ids to elements. This is useful for styling elements with CSS or adding anchors to elements. The syntax for this is:

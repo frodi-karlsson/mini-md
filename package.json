@@ -1,6 +1,6 @@
 {
   "name": "mini-md",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "A minimalist markdown engine built on express and markdown-it",
   "type": "module",
   "main": "index.js",
@@ -10,7 +10,7 @@
     "generate-types": "tsc --declaration --emitDeclarationOnly --allowJs --checkJs --module nodenext --target es6 --resolveJsonModule --allowSyntheticDefaultImports --moduleResolution nodenext --outDir dist ./index.js",
     "build": "npm run rollup && npm run generate-types",
     "pack": "npm pack",
-    "move": "mv mini-md-1.0.15.tgz ./demo/mini-md.tgz",
+    "move": "mv mini-md-1.0.16.tgz ./demo/mini-md.tgz",
     "reinstall-demo": "cd demo && npm remove mini-md && npm install mini-md.tgz && cd ..",
     "build-demo": "npm run pack && npm run move && npm run reinstall-demo",
     "demo": "cd demo && npm start && cd ..",

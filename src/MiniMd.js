@@ -534,13 +534,43 @@ export default class MiniMD {
         Helpers.warn("Could not find dependency template: " + name);
         return;
       }
+      let injectedContent = template.content;
+      dependency.injections.forEach((injection) => {
+        console.log("Injecting", injection.name, "into", name, "template");
+        const injectionMarker = injectedContent.matchAll(
+          new RegExp(`{{\\s*${injection.name}\\s*}}`, "g")
+        );
+        if (!injectionMarker) {
+          Helpers.warn(
+            "Could not find injection marker",
+            injection.name,
+            "in",
+            name,
+            "template"
+          );
+          return;
+        }
+        const injectionMarkerArray = [...injectionMarker];
+        injectionMarkerArray.forEach((match) => {
+          const start = match.index;
+          const end = match.index + match[0].length;
+          const before = injectedContent.slice(0, start);
+          const after = injectedContent.slice(end);
+          injectedContent = before + injection.value + after;
+          offsetAdditions.push({
+            start: dependency.index + iOffset + start,
+            length: injection.value.length - match[0].length,
+          });
+        });
+      });
+
       const rec = this.parseAttrs(this.getTemplate(dependency.name).content);
       const { dependencies: recDependencies, ...recAttrs } = rec;
       const [body, recTags] = this.addDependencies(
-        template.content,
+        injectedContent,
         recDependencies
       );
-      const attrs = this.parseAttrs(template.content);
+      const attrs = this.parseAttrs(injectedContent);
       attrs.schemes = [...new Set([...attrs.schemes, ...recAttrs.schemes])];
       const recScripts = this.makeScriptTags(this.getTemplate(dependency.name));
       const head = this.buildHead("", "", recScripts, attrs, recTags);
@@ -736,8 +766,15 @@ export default class MiniMD {
   }
 
   /**
+   * Represents an injection to inject into a template. {{ name }} will be replaced with the value
+   * @typedef {Object} Injection
+   * @property {string} name The name of the injection
+   * @property {string} value The value of the injection
+   */
+  /**
    * Represents a dependency on another template
    * @typedef {Object} Dependency
+   * @property {Injection[]} injections The injections to inject into the template.
    * @property {string} name The name of the dependency
    * @property {number} index The index of the dependency
    * @property {number} length The length of the dependency
@@ -787,23 +824,44 @@ export default class MiniMD {
     }
 
     matches.forEach((macro, index) => {
-      const attrRegex = /([a-zA-Z0-9]*)="(.*)"[ ,)]*/g;
+      const attrRegex =
+        /(?:([a-zA-Z0-9]*)="([^\"]+)")(?:\s+([a-zA-Z0-9]*)="(.+)")*/g;
       let attrMatch;
       while ((attrMatch = attrRegex.exec(macro[0])) !== null) {
-        const key = attrMatch[1];
-        const value = attrMatch[2];
-        if (key === "template") {
+        const keys = [];
+        const values = [];
+        attrMatch.slice(1).forEach((attr, index) => {
+          if (index % 2 === 0) {
+            if (attr) keys.push(attr);
+          } else {
+            if (attr) values.push(attr);
+          }
+        });
+        if (keys[0] === "template") {
+          console.log("found dependency with keys and values", keys, values);
           const endOfLine = template.indexOf("\n", macro.index);
+          const injections = keys.slice(1).map((key, index) => {
+            return {
+              name: key,
+              value: values[index + 1],
+            };
+          });
           const dependency = {
-            name: value,
+            name: values[0],
+            injections,
             index: macro.index,
             length: endOfLine - macro.index,
           };
           attrs.dependencies.push(dependency);
-        } else if (key === "scheme") {
-          attrs.schemes.push(value);
         } else {
-          attrs[key] = value;
+          keys.forEach((key, index) => {
+            const value = values[index];
+            if (key === "scheme") {
+              attrs.schemes.push(value);
+            } else {
+              attrs[key] = value;
+            }
+          });
         }
       }
     });

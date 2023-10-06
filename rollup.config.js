@@ -5,7 +5,17 @@ export default {
   output: {
     file: "index.cjs",
     format: "cjs",
+    exports: "named",
   },
-  exports: "named",
+  external: [
+    "fs",
+    "path",
+    "markdown-it",
+    "mkdirp",
+    "markdown-it-checkbox",
+    "markdown-it-attrs",
+    "markdown-it-anchor",
+    "express",
+  ],
   plugins: [json()],
 };
