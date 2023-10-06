@@ -784,6 +784,7 @@ export default class MiniMD {
     }
 
     matches.forEach((macro, index) => {
+      console.log("found macro", macro[0]);
       const attrRegex = /([a-zA-Z0-9]*)="(.*)"[ ,)]*/g;
       let attrMatch;
       while ((attrMatch = attrRegex.exec(macro[0])) !== null) {
