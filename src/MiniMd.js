@@ -564,6 +564,30 @@ export default class MiniMD {
         });
       });
 
+      const remainingInjections = injectedContent.matchAll(
+        new RegExp(`{{\\s*.*\\s*}}`, "g")
+      );
+      const remainingInjectionsArray = [...remainingInjections];
+      if (remainingInjectionsArray.length > 0) {
+        Helpers.warn(
+          "Found remaining injections in template",
+          name,
+          "template:",
+          remainingInjectionsArray.map((injection) => injection[0]).join(", ")
+        );
+      }
+      remainingInjectionsArray.forEach((match) => {
+        const start = match.index;
+        const end = match.index + match[0].length;
+        const before = injectedContent.slice(0, start);
+        const after = injectedContent.slice(end);
+        injectedContent = before + after;
+        offsetAdditions.push({
+          start: dependency.index + iOffset + start,
+          length: -match[0].length,
+        });
+      });
+
       const rec = this.parseAttrs(this.getTemplate(dependency.name).content);
       const { dependencies: recDependencies, ...recAttrs } = rec;
       const [body, recTags] = this.addDependencies(
