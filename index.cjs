@@ -889,9 +889,9 @@ class MiniMD {
     const components = this.makeComponentTags();
     const styles = this.makeStyleTags();
     const scripts = this.makeScriptTags(template);
-    console.log("attrs", attrs);
     const head = this.buildHead(components, styles, scripts, attrs, depHeads);
-    return [wrapped, head];
+    const uniqueHead = [...new Set(head.split("\n"))].join("\n");
+    return [wrapped, uniqueHead];
   }
 
   /**
@@ -930,7 +930,6 @@ class MiniMD {
       rendered = injected;
       tags.push(head);
     });
-    console.log("tags", tags, "for dependencies", dependencies);
     return [rendered, tags];
   }
 
@@ -944,11 +943,11 @@ class MiniMD {
    * @returns {string}
    */
   buildHead(components, styles, scripts, attrs, depHeads) {
-    return `\
-    <head>\
-    ${scripts}\
-    ${components}\
-    ${styles}\
+    return `
+    <head>
+    ${scripts}
+    ${components}
+    ${styles}
     ${
       attrs.schemes
         ? attrs.schemes
@@ -961,64 +960,65 @@ class MiniMD {
             )
             .join("\n")
         : ""
-    }\
-    ${attrs.title ? `<title>${attrs.title}</title>` : ""}\
-    ${attrs.charset ? `<meta charset="${attrs.charset}">` : ""}\
+    }
+    ${attrs.title ? `<title>${attrs.title}</title>` : ""}
+    ${attrs.charset ? `<meta charset="${attrs.charset}">` : ""}
     ${
       attrs.viewport ? `<meta name="viewport" content="${attrs.viewport}">` : ""
-    }\
+    }
     ${
       attrs.description
         ? `<meta name="description" content="${attrs.description}">`
         : ""
-    }\
-    ${attrs.author ? `<meta name="author" content="${attrs.author}">` : ""}\
+    }
+    ${attrs.author ? `<meta name="author" content="${attrs.author}">` : ""}
     ${
       attrs.keywords ? `<meta name="keywords" content="${attrs.keywords}">` : ""
-    }\
-    ${attrs.robots ? `<meta name="robots" content="${attrs.robots}">` : ""}\
+    }
+    ${attrs.robots ? `<meta name="robots" content="${attrs.robots}">` : ""}
     ${
       attrs.ogTitle
         ? `<meta property="og:title" content="${attrs.ogTitle}">`
         : ""
-    }\
-    ${
-      attrs.ogType ? `<meta property="og:type" content="${attrs.ogType}">` : ""
-    }\
-    ${attrs.ogUrl ? `<meta property="og:url" content="${attrs.ogUrl}">` : ""}\
+    }
+    ${attrs.ogType ? `<meta property="og:type" content="${attrs.ogType}">` : ""}
+    ${attrs.ogUrl ? `<meta property="og:url" content="${attrs.ogUrl}">` : ""}
     ${
       attrs.ogDescription
         ? `<meta property="og:description" content="${attrs.ogDescription}">`
         : ""
-    }\
+    }
     ${
       attrs.ogImage
         ? `<meta property="og:image" content="${attrs.ogImage}">`
         : ""
-    }\
+    }
     ${
       attrs.twitterCard
         ? `<meta name="twitter:card" content="${attrs.twitterCard}">`
         : ""
-    }\
+    }
     ${
       attrs.ogLocale
         ? `<meta property="og:locale" content="${attrs.ogLocale}">`
         : ""
-    }\
+    }
     ${
       attrs.ogSiteName
         ? `<meta property="og:site_name" content="${attrs.ogSiteName}">`
         : ""
-    }\
+    }
     ${
       attrs.twitterImageAlt
         ? `<meta name="twitter:image:alt" content="${attrs.twitterImageAlt}">`
         : ""
-    }\
-    ${depHeads.join("\n")}\
-    </head>\
-    `;
+    }
+    ${depHeads.join("\n")}
+    </head>
+    `
+      .split("\n")
+      .map((line) => line.trim())
+      .join("\n");
   }
   /**
    * Wraps content in <mini-md> tags
@@ -1100,10 +1100,13 @@ class MiniMD {
     // add scripts that match the template name
     const userScriptPath = this.io.getPath("Scripts", "user");
     const userScriptFiles = this.io.getFiles("Scripts", "user");
+    console.log(userScriptFiles);
     userScriptFiles.forEach((file) => {
       const parts = file.split(/[/\\]/g);
-      const name = parts[parts.length - 1].replace(".js", "");
-      if (name.startsWith(template.name)) {
+      if (
+        parts.some((part) => part.startsWith(template.name)) ||
+        parts.slice(0, parts.length - 1).includes("global")
+      ) {
         scripts.push(`<script src="${userScriptPath}/${file}"></script>`);
       }
     });
