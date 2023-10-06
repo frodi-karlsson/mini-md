@@ -500,7 +500,6 @@ export default class MiniMD {
     const components = this.makeComponentTags();
     const styles = this.makeStyleTags();
     const scripts = this.makeScriptTags(template);
-    console.log("attrs", attrs);
     const head = this.buildHead(components, styles, scripts, attrs, depHeads);
     return [wrapped, head];
   }
@@ -541,7 +540,6 @@ export default class MiniMD {
       rendered = injected;
       tags.push(head);
     });
-    console.log("tags", tags, "for dependencies", dependencies);
     return [rendered, tags];
   }
 
