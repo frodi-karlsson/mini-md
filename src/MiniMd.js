@@ -528,7 +528,6 @@ export default class MiniMD {
         dependency.index + iOffset,
         dependency.index + iOffset + dependency.length
       );
-      console.log("slicing away dependency", rest);
       const name = dependency.name;
       const template = this.getTemplate(name);
       if (!template) {
@@ -724,7 +723,6 @@ export default class MiniMD {
     // add scripts that match the template name
     const userScriptPath = this.io.getPath("Scripts", "user");
     const userScriptFiles = this.io.getFiles("Scripts", "user");
-    console.log(userScriptFiles);
     userScriptFiles.forEach((file) => {
       const parts = file.split(/[/\\]/g);
       if (
@@ -789,7 +787,6 @@ export default class MiniMD {
     }
 
     matches.forEach((macro, index) => {
-      console.log("found macro", macro[0]);
       const attrRegex = /([a-zA-Z0-9]*)="(.*)"[ ,)]*/g;
       let attrMatch;
       while ((attrMatch = attrRegex.exec(macro[0])) !== null) {
