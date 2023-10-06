@@ -20,6 +20,7 @@ const routes = [
   ["/schemes", "schemes"],
   ["/seo", "SEO"],
   ["/components", "components"],
+  ["/scripts", "scripts"],
   ["/basic-implementation", "Basic Implementation"],
   ["*", "404"],
 ];

@@ -770,6 +770,23 @@ class MiniMD {
   }
 
   /**
+   * Do all the parsing and rendering for the given template
+   * @param {string} name The name of the template
+   * @param {string} route The route that the template is being rendered for
+   * @returns {[[string, string], Attrs]} The head and body of the rendered template and the parsed attributes
+   */
+  handleTemplate(name, route) {
+    const template = this.getTemplate(name);
+    if (!template) {
+      Helpers.error("Could not find template:", name, "for route:", route);
+      return null;
+    }
+    const { dependencies, ...attrs } = this.parseAttrs(template.content);
+    const [body, head] = this.renderTemplate(template, dependencies, attrs);
+    return [[head, body], attrs];
+  }
+
+  /**
    * Initialize the express app
    * @private
    * @returns {void}
@@ -789,15 +806,14 @@ class MiniMD {
     }
     this._routes.forEach(([route, name, method]) => {
       this.app[method ?? "get"](route, (req, res, next) => {
-        const template = this.getTemplate(name);
-        if (!template) {
-          Helpers.error("Could not find template:", name, "for route:", route);
-          return next();
+        const parsed = this.handleTemplate(name, route);
+        if (!parsed) {
+          next();
+        } else {
+          const [[head, body], attrs] = parsed;
+          const uniqueHead = [...new Set(head.split("\n"))].join("\n");
+          res.send(this.makeDocument(uniqueHead + body, attrs));
         }
-        const parsedAttrs = this.parseAttrs(template.content);
-        const { dependencies, ...attrs } = parsedAttrs;
-        const [body, head] = this.renderTemplate(template, dependencies, attrs);
-        res.send(this.makeDocument(head + body, attrs));
       });
       Helpers.success(
         "added",
@@ -864,14 +880,17 @@ class MiniMD {
    */
   renderTemplate(template, dependencies, attrs) {
     const content = template.content;
-    const withDependencies = this.addDependencies(content, dependencies);
+    const [withDependencies, depHeads] = this.addDependencies(
+      content,
+      dependencies
+    );
     const rendered = this._md.render(withDependencies);
     const wrapped = this.wrap(rendered);
     const components = this.makeComponentTags();
     const styles = this.makeStyleTags();
-    const scripts = this.makeScriptTags();
+    const scripts = this.makeScriptTags(template);
     console.log("attrs", attrs);
-    const head = this.buildHead(components, styles, scripts, attrs);
+    const head = this.buildHead(components, styles, scripts, attrs, depHeads);
     return [wrapped, head];
   }
 
@@ -879,24 +898,40 @@ class MiniMD {
    * Injects the dependencies into the rendered template
    * @param {string} rendered The rendered template
    * @param {Dependency[]} dependencies The dependencies to inject
+   * @returns {[string, string[]]} The rendered template and the tags to add to the head
    */
   addDependencies(rendered, dependencies) {
     let iOffset = 0;
+    const tags = [];
     dependencies.sort((a, b) => a.index - b.index);
     dependencies.forEach((dependency) => {
       const start = rendered.slice(0, dependency.index + iOffset);
       const length = dependency.length;
       const end = rendered.slice(dependency.index + iOffset + length);
-      const template = this.getTemplate(dependency.name);
+      const name = dependency.name;
+      const template = this.getTemplate(name);
       if (!template) {
-        Helpers.warn("Could not find template: " + dependency.name);
+        Helpers.warn("Could not find dependency template: " + name);
         return;
       }
-      const injected = start + template.content + end;
-      iOffset += template.content.length;
+      const rec = this.parseAttrs(this.getTemplate(dependency.name).content);
+      const { dependencies: recDependencies, ...recAttrs } = rec;
+      const [body, recTags] = this.addDependencies(
+        template.content,
+        recDependencies
+      );
+      const attrs = this.parseAttrs(template.content);
+      attrs.schemes = [...new Set([...attrs.schemes, ...recAttrs.schemes])];
+      const recScripts = this.makeScriptTags(this.getTemplate(dependency.name));
+      const head = this.buildHead("", "", recScripts, attrs, recTags);
+
+      const injected = start + body + end;
+      iOffset += body.length;
       rendered = injected;
+      tags.push(head);
     });
-    return rendered;
+    console.log("tags", tags, "for dependencies", dependencies);
+    return [rendered, tags];
   }
 
   /**
@@ -905,14 +940,15 @@ class MiniMD {
    * @param {string} styles The styles to add
    * @param {string} scripts The scripts to add
    * @param {Attrs} attrs The attributes to add
+   * @param {string[]} depHeads The dependency heads to add
    * @returns {string}
    */
-  buildHead(components, styles, scripts, attrs) {
-    return `
-    <head>
-    ${scripts}
-    ${components}
-    ${styles}
+  buildHead(components, styles, scripts, attrs, depHeads) {
+    return `\
+    <head>\
+    ${scripts}\
+    ${components}\
+    ${styles}\
     ${
       attrs.schemes
         ? attrs.schemes
@@ -925,60 +961,63 @@ class MiniMD {
             )
             .join("\n")
         : ""
-    }
-    ${attrs.title ? `<title>${attrs.title}</title>` : ""}
-    ${attrs.charset ? `<meta charset="${attrs.charset}">` : ""}
+    }\
+    ${attrs.title ? `<title>${attrs.title}</title>` : ""}\
+    ${attrs.charset ? `<meta charset="${attrs.charset}">` : ""}\
     ${
       attrs.viewport ? `<meta name="viewport" content="${attrs.viewport}">` : ""
-    }
+    }\
     ${
       attrs.description
         ? `<meta name="description" content="${attrs.description}">`
         : ""
-    }
-    ${attrs.author ? `<meta name="author" content="${attrs.author}">` : ""}
+    }\
+    ${attrs.author ? `<meta name="author" content="${attrs.author}">` : ""}\
     ${
       attrs.keywords ? `<meta name="keywords" content="${attrs.keywords}">` : ""
-    }
-    ${attrs.robots ? `<meta name="robots" content="${attrs.robots}">` : ""}
+    }\
+    ${attrs.robots ? `<meta name="robots" content="${attrs.robots}">` : ""}\
     ${
       attrs.ogTitle
         ? `<meta property="og:title" content="${attrs.ogTitle}">`
         : ""
-    }
-    ${attrs.ogType ? `<meta property="og:type" content="${attrs.ogType}">` : ""}
-    ${attrs.ogUrl ? `<meta property="og:url" content="${attrs.ogUrl}">` : ""}
+    }\
+    ${
+      attrs.ogType ? `<meta property="og:type" content="${attrs.ogType}">` : ""
+    }\
+    ${attrs.ogUrl ? `<meta property="og:url" content="${attrs.ogUrl}">` : ""}\
     ${
       attrs.ogDescription
         ? `<meta property="og:description" content="${attrs.ogDescription}">`
         : ""
-    }
+    }\
     ${
       attrs.ogImage
         ? `<meta property="og:image" content="${attrs.ogImage}">`
         : ""
-    }
+    }\
     ${
       attrs.twitterCard
         ? `<meta name="twitter:card" content="${attrs.twitterCard}">`
         : ""
-    }
+    }\
     ${
       attrs.ogLocale
         ? `<meta property="og:locale" content="${attrs.ogLocale}">`
         : ""
-    }
+    }\
     ${
       attrs.ogSiteName
         ? `<meta property="og:site_name" content="${attrs.ogSiteName}">`
         : ""
-    }
+    }\
     ${
       attrs.twitterImageAlt
         ? `<meta name="twitter:image:alt" content="${attrs.twitterImageAlt}">`
         : ""
-    }
-    </head>
+    }\
+    ${depHeads.join("\n")}\
+    </head>\
     `;
   }
   /**
@@ -1047,19 +1086,27 @@ class MiniMD {
 
   /**
    * Builds the script tags
+   * @param {Template} template The template to build the script tags for
    * @returns {string}
    */
-  makeScriptTags() {
+  makeScriptTags(template) {
     const scripts = [];
-    [/** @type {const} */ ("user"), /** @type {const} */ ("project")].forEach(
-      (type) => {
-        const scriptPath = this.io.getPath("Scripts", type);
-        const scriptFiles = this.io.getFiles("Scripts", type);
-        scriptFiles.forEach((file) => {
-          scripts.push(`<script src="${scriptPath}/${file}"></script>`);
-        });
+    // add global project scripts
+    const scriptPath = this.io.getPath("Scripts", "project");
+    const scriptFiles = this.io.getFiles("Scripts", "project");
+    scriptFiles.forEach((file) => {
+      scripts.push(`<script src="${scriptPath}/${file}"></script>`);
+    });
+    // add scripts that match the template name
+    const userScriptPath = this.io.getPath("Scripts", "user");
+    const userScriptFiles = this.io.getFiles("Scripts", "user");
+    userScriptFiles.forEach((file) => {
+      const parts = file.split(/[/\\]/g);
+      const name = parts[parts.length - 1].replace(".js", "");
+      if (name.startsWith(template.name)) {
+        scripts.push(`<script src="${userScriptPath}/${file}"></script>`);
       }
-    );
+    });
     return scripts.join("\n");
   }
 

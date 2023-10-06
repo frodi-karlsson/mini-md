@@ -219,6 +219,46 @@ export default class MiniMD {
      */
     private initMd;
     /**
+     * Do all the parsing and rendering for the given template
+     * @param {string} name The name of the template
+     * @param {string} route The route that the template is being rendered for
+     * @returns {[[string, string], Attrs]} The head and body of the rendered template and the parsed attributes
+     */
+    handleTemplate(name: string, route: string): [[string, string], {
+        title?: string;
+        lang?: string;
+        schemes?: string[];
+        charset?: string;
+        description?: string;
+        author?: string;
+        keywords?: string;
+        viewport?: string;
+        robots?: string;
+        ogTitle?: string;
+        ogType?: string;
+        ogUrl?: string;
+        ogDescription?: string;
+        ogImage?: string;
+        twitterCard?: string;
+        ogLocale?: string;
+        ogSiteName?: string;
+        twitterImageAlt?: string;
+        dependencies?: {
+            /**
+             * The name of the dependency
+             */
+            name: string;
+            /**
+             * The index of the dependency
+             */
+            index: number;
+            /**
+             * The length of the dependency
+             */
+            length: number;
+        }[];
+    }];
+    /**
      * Initialize the express app
      * @private
      * @returns {void}
@@ -297,6 +337,7 @@ export default class MiniMD {
      * Injects the dependencies into the rendered template
      * @param {string} rendered The rendered template
      * @param {Dependency[]} dependencies The dependencies to inject
+     * @returns {[string, string[]]} The rendered template and the tags to add to the head
      */
     addDependencies(rendered: string, dependencies: {
         /**
@@ -311,13 +352,14 @@ export default class MiniMD {
          * The length of the dependency
          */
         length: number;
-    }[]): string;
+    }[]): [string, string[]];
     /**
      * Builds the head of the rendered template
      * @param {string} components The components to add
      * @param {string} styles The styles to add
      * @param {string} scripts The scripts to add
      * @param {Attrs} attrs The attributes to add
+     * @param {string[]} depHeads The dependency heads to add
      * @returns {string}
      */
     buildHead(components: string, styles: string, scripts: string, attrs: {
@@ -353,7 +395,7 @@ export default class MiniMD {
              */
             length: number;
         }[];
-    }): string;
+    }, depHeads: string[]): string;
     /**
      * Wraps content in <mini-md> tags
      * @param {string} content The content to wrap
@@ -410,9 +452,10 @@ export default class MiniMD {
     makeStyleTags(): string;
     /**
      * Builds the script tags
+     * @param {Template} template The template to build the script tags for
      * @returns {string}
      */
-    makeScriptTags(): string;
+    makeScriptTags(template: Template): string;
     /**
      * Represents a dependency on another template
      * @typedef {Object} Dependency
