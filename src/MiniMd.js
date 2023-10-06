@@ -549,7 +549,7 @@ export default class MiniMD {
       const injected = start + body + end;
       offsetAdditions.push({
         start: dependency.index + iOffset,
-        length: body.length,
+        length: body.length - rest.length,
       });
       rendered = injected;
       tags.push(head);
