@@ -524,6 +524,11 @@ export default class MiniMD {
       const end = rendered.slice(
         dependency.index + iOffset + dependency.length
       );
+      const rest = rendered.slice(
+        dependency.index + iOffset,
+        dependency.index + iOffset + dependency.length
+      );
+      console.log("slicing away dependency", rest);
       const name = dependency.name;
       const template = this.getTemplate(name);
       if (!template) {
