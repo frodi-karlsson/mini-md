@@ -513,13 +513,17 @@ export default class MiniMD {
    * @returns {[string, string[]]} The rendered template and the tags to add to the head
    */
   addDependencies(rendered, dependencies) {
-    let iOffset = 0;
+    const offsetAdditions = [];
     const tags = [];
     dependencies.sort((a, b) => a.index - b.index);
     dependencies.forEach((dependency) => {
+      const iOffset = offsetAdditions
+        .filter((a) => a.start < dependency.index)
+        .reduce((acc, cur) => acc + cur.length, 0);
       const start = rendered.slice(0, dependency.index + iOffset);
-      const length = dependency.length;
-      const end = rendered.slice(dependency.index + iOffset + length);
+      const end = rendered.slice(
+        dependency.index + iOffset + dependency.length
+      );
       const name = dependency.name;
       const template = this.getTemplate(name);
       if (!template) {
@@ -538,7 +542,10 @@ export default class MiniMD {
       const head = this.buildHead("", "", recScripts, attrs, recTags);
 
       const injected = start + body + end;
-      iOffset += body.length;
+      offsetAdditions.push({
+        start: dependency.index + iOffset,
+        length: body.length,
+      });
       rendered = injected;
       tags.push(head);
     });

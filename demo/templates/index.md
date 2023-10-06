@@ -14,3 +14,5 @@ This is a demo homepage for mini-md, a markdown based website generator that req
 
 It is written in Node.js and uses Express.js for the server and Markdown-it for the markdown parsing.
 Feel free to browse this as an example of what mini-md can do, as it also provides a fair bit of usage documentation.
+
+[//]: # (template="shared")

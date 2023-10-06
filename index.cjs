@@ -925,8 +925,20 @@ class MiniMD {
       const recScripts = this.makeScriptTags(this.getTemplate(dependency.name));
       const head = this.buildHead("", "", recScripts, attrs, recTags);
 
+      console.log("previous", rendered);
       const injected = start + body + end;
+      console.log("injected", injected);
+      console.log("previous offset", iOffset);
+      console.log(
+        "char at offset",
+        injected.charAt(dependency.index + iOffset)
+      );
       iOffset += body.length;
+      console.log("new offset", iOffset);
+      console.log(
+        "char at offset",
+        injected.charAt(dependency.index + iOffset)
+      );
       rendered = injected;
       tags.push(head);
     });
