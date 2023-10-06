@@ -870,6 +870,7 @@ class MiniMD {
     const components = this.makeComponentTags();
     const styles = this.makeStyleTags();
     const scripts = this.makeScriptTags();
+    console.log("attrs", attrs);
     const head = this.buildHead(components, styles, scripts, attrs);
     return [wrapped, head];
   }
@@ -913,11 +914,16 @@ class MiniMD {
     ${components}
     ${styles}
     ${
-      attrs.scheme
-        ? `<link rel="stylesheet" href="${this.io.getPath(
-            "Styles",
-            "user"
-          )}/schemes/${attrs.scheme}.css">`
+      attrs.schemes
+        ? attrs.schemes
+            .map(
+              (scheme) =>
+                `<link rel="stylesheet" href="${this.io.getPath(
+                  "Styles",
+                  "user"
+                )}/schemes/${scheme}.css">`
+            )
+            .join("\n")
         : ""
     }
     ${attrs.title ? `<title>${attrs.title}</title>` : ""}
@@ -1069,7 +1075,7 @@ class MiniMD {
    * @typedef {Object} Attrs
    * @property {string} [title]
    * @property {string} [lang]
-   * @property {string} [scheme]
+   * @property {string[]} [schemes]
    * @property {string} [charset]
    * @property {string} [description]
    * @property {string} [author]
@@ -1096,6 +1102,7 @@ class MiniMD {
   parseAttrs(template) {
     const attrs = {
       dependencies: [],
+      schemes: [],
     };
     const regex = /(\[\/\/\]: # \(.*\))/g;
     let matches = [];
@@ -1121,8 +1128,11 @@ class MiniMD {
             length: endOfLine - macro.index,
           };
           attrs.dependencies.push(dependency);
+        } else if (key === "scheme") {
+          attrs.schemes.push(value);
+        } else {
+          attrs[key] = value;
         }
-        attrs[attrMatch[1]] = attrMatch[2];
       }
     });
     return attrs;

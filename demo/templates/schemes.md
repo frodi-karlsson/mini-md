@@ -1,5 +1,5 @@
-[//]: # (title: Changing schemes)
-[//]: # (scheme: dark)
+[//]: # (title="Changing schemes")
+[//]: # (scheme="dark")
 
 [//]: # (template="shared")
 

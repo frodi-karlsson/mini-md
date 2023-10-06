@@ -262,7 +262,7 @@ export default class MiniMD {
     }[], attrs: {
         title?: string;
         lang?: string;
-        scheme?: string;
+        schemes?: string[];
         charset?: string;
         description?: string;
         author?: string;
@@ -323,7 +323,7 @@ export default class MiniMD {
     buildHead(components: string, styles: string, scripts: string, attrs: {
         title?: string;
         lang?: string;
-        scheme?: string;
+        schemes?: string[];
         charset?: string;
         description?: string;
         author?: string;
@@ -368,7 +368,7 @@ export default class MiniMD {
     makeDocument(rendered: string, attrs: {
         title?: string;
         lang?: string;
-        scheme?: string;
+        schemes?: string[];
         charset?: string;
         description?: string;
         author?: string;
@@ -425,7 +425,7 @@ export default class MiniMD {
      * @typedef {Object} Attrs
      * @property {string} [title]
      * @property {string} [lang]
-     * @property {string} [scheme]
+     * @property {string[]} [schemes]
      * @property {string} [charset]
      * @property {string} [description]
      * @property {string} [author]
@@ -452,7 +452,7 @@ export default class MiniMD {
     parseAttrs(template: string): {
         title?: string;
         lang?: string;
-        scheme?: string;
+        schemes?: string[];
         charset?: string;
         description?: string;
         author?: string;
