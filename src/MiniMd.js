@@ -508,11 +508,10 @@ export default class MiniMD {
 
   /**
    * Injects values into dependency templates
-   * @param {string} rendered The rendered template
    * @param {Dependency[]} dependencies The dependencies to inject
    * @returns {Dependency[]} The dependencies with the values injected
    */
-  injectIntoDependencies(rendered, dependencies) {
+  injectIntoDependencies(dependencies) {
     dependencies.sort((a, b) => a.index - b.index);
     let offSet = 0;
     dependencies.forEach((dependency) => {
@@ -523,11 +522,11 @@ export default class MiniMD {
       }
       const injections = dependency.injections;
       const injectionMarkers = depTemplate.matchAll(
-        new RegExp(`{{\\s*(.*)\\s*}}`, "g")
+        new RegExp(`{{\\s*(.*?)\\s*}}`, "g")
       );
       [...injectionMarkers].forEach((match) => {
         const start = match.index + offSet;
-        const injectionKey = match[1].trim();
+        const injectionKey = match[1];
         let value = injections.find(
           (injection) => injection.name === injectionKey
         )?.value;
@@ -608,9 +607,8 @@ export default class MiniMD {
    * @returns {[string, string[]]} The rendered template and the tags to add to the head
    */
   addDependencies(rendered, dependencies) {
-    console.log("adding dependencies");
     const tags = [];
-    dependencies = this.injectIntoDependencies(rendered, dependencies);
+    dependencies = this.injectIntoDependencies(dependencies);
     const dependencyTags = this.makeDependencyTags(dependencies);
     rendered = this.injectDependencies(rendered, dependencies);
     tags.push(...dependencyTags);
@@ -846,55 +844,37 @@ export default class MiniMD {
       schemes: [],
     };
     const regex = /(\[\/\/\]: # \(.*\))/g;
-    let matches = [];
-    let match;
-    while ((match = regex.exec(template)) !== null) {
-      matches.push(match);
-    }
+    const matches = [...template.matchAll(regex)];
+
     if (matches.length === 0) {
       return attrs;
     }
 
-    matches.forEach((macro, index) => {
+    matches.forEach((macro) => {
       const attrRegex =
-        /(?:([a-zA-Z0-9]*)="([^\"]+)")(?:\s+([a-zA-Z0-9]*)="(.+)")*/g;
-      let attrMatch;
-      while ((attrMatch = attrRegex.exec(macro[0])) !== null) {
-        const keys = [];
-        const values = [];
-        attrMatch.slice(1).forEach((attr, index) => {
-          if (index % 2 === 0) {
-            if (attr) keys.push(attr);
-          } else {
-            if (attr) values.push(attr);
-          }
+        /(?:([a-zA-Z0-9]*?)="([^\"]+?)")(?:\s+([a-zA-Z0-9]+?)="([^\"]+?)")*?/g;
+      const entries = [...macro[0].matchAll(attrRegex)];
+      const mappedEntries = entries.map((entry) => ({
+        name: entry[1],
+        value: entry[2],
+      }));
+      if (entries.length === 0) {
+        Helpers.warn("Could not parse attributes from macro:", macro[0]);
+      } else if (mappedEntries[0].name === "template") {
+        const endOfLine = template.indexOf("\n", macro.index);
+        const dependency = {
+          name: mappedEntries[0].value,
+          injections: mappedEntries.slice(1),
+          index: macro.index,
+          length: endOfLine - macro.index,
+        };
+        attrs.dependencies.push(dependency);
+      } else if (mappedEntries[0].name === "scheme") {
+        attrs.schemes.push(mappedEntries[0].value);
+      } else {
+        mappedEntries.forEach((entry) => {
+          attrs[entry.name] = entry.value;
         });
-        if (keys[0] === "template") {
-          console.log("found dependency with keys and values", keys, values);
-          const endOfLine = template.indexOf("\n", macro.index);
-          const injections = keys.slice(1).map((key, index) => {
-            return {
-              name: key,
-              value: values[index + 1],
-            };
-          });
-          const dependency = {
-            name: values[0],
-            injections,
-            index: macro.index,
-            length: endOfLine - macro.index,
-          };
-          attrs.dependencies.push(dependency);
-        } else {
-          keys.forEach((key, index) => {
-            const value = values[index];
-            if (key === "scheme") {
-              attrs.schemes.push(value);
-            } else {
-              attrs[key] = value;
-            }
-          });
-        }
       }
     });
     return attrs;

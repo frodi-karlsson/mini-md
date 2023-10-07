@@ -40,7 +40,7 @@ Then in the template you can use the key to inject the value. For example:
 
 Thanks, angular.
 
-[//]: # (template="injection" key="value")
+[//]: # (template="injection" key="value" key2="value2")
 
 ### Markdown-it-attrs
 

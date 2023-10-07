@@ -386,11 +386,10 @@ export default class MiniMD {
     }): [string, string];
     /**
      * Injects values into dependency templates
-     * @param {string} rendered The rendered template
      * @param {Dependency[]} dependencies The dependencies to inject
      * @returns {Dependency[]} The dependencies with the values injected
      */
-    injectIntoDependencies(rendered: string, dependencies: {
+    injectIntoDependencies(dependencies: {
         /**
          * The injections to inject into the template.
          */
