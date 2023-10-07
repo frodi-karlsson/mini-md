@@ -12,6 +12,7 @@ export default class Template {
      * @returns {string}
      */
     get name(): string;
+    set content(arg: string);
     /**
      * The content of the template
      * @returns {string}

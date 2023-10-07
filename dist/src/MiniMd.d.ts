@@ -269,6 +269,10 @@ export default class MiniMD {
              * The length of the dependency
              */
             length: number;
+            /**
+             * The content of the dependency
+             */
+            content?: string | undefined;
         }[];
     }];
     /**
@@ -325,6 +329,10 @@ export default class MiniMD {
          * The length of the dependency
          */
         length: number;
+        /**
+         * The content of the dependency
+         */
+        content?: string | undefined;
     }[], attrs: {
         title?: string;
         lang?: string;
@@ -370,8 +378,152 @@ export default class MiniMD {
              * The length of the dependency
              */
             length: number;
+            /**
+             * The content of the dependency
+             */
+            content?: string | undefined;
         }[];
     }): [string, string];
+    /**
+     * Injects values into dependency templates
+     * @param {string} rendered The rendered template
+     * @param {Dependency[]} dependencies The dependencies to inject
+     * @returns {Dependency[]} The dependencies with the values injected
+     */
+    injectIntoDependencies(rendered: string, dependencies: {
+        /**
+         * The injections to inject into the template.
+         */
+        injections: {
+            /**
+             * The name of the injection
+             */
+            name: string;
+            /**
+             * The value of the injection
+             */
+            value: string;
+        }[];
+        /**
+         * The name of the dependency
+         */
+        name: string;
+        /**
+         * The index of the dependency
+         */
+        index: number;
+        /**
+         * The length of the dependency
+         */
+        length: number;
+        /**
+         * The content of the dependency
+         */
+        content?: string | undefined;
+    }[]): {
+        /**
+         * The injections to inject into the template.
+         */
+        injections: {
+            /**
+             * The name of the injection
+             */
+            name: string;
+            /**
+             * The value of the injection
+             */
+            value: string;
+        }[];
+        /**
+         * The name of the dependency
+         */
+        name: string;
+        /**
+         * The index of the dependency
+         */
+        index: number;
+        /**
+         * The length of the dependency
+         */
+        length: number;
+        /**
+         * The content of the dependency
+         */
+        content?: string | undefined;
+    }[];
+    /**
+     * Creates head tags for the given dependencies
+     * @param {Dependency[]} dependencies The dependencies to create tags for
+     * @returns {string[]} The tags
+     */
+    makeDependencyTags(dependencies: {
+        /**
+         * The injections to inject into the template.
+         */
+        injections: {
+            /**
+             * The name of the injection
+             */
+            name: string;
+            /**
+             * The value of the injection
+             */
+            value: string;
+        }[];
+        /**
+         * The name of the dependency
+         */
+        name: string;
+        /**
+         * The index of the dependency
+         */
+        index: number;
+        /**
+         * The length of the dependency
+         */
+        length: number;
+        /**
+         * The content of the dependency
+         */
+        content?: string | undefined;
+    }[]): string[];
+    /**
+     * Replaces dependencies with the content of the dependency
+     * @param {string} rendered The rendered template
+     * @param {Dependency[]} dependencies The dependencies to inject
+     * @returns {string} The rendered template with the dependencies injected
+     */
+    injectDependencies(rendered: string, dependencies: {
+        /**
+         * The injections to inject into the template.
+         */
+        injections: {
+            /**
+             * The name of the injection
+             */
+            name: string;
+            /**
+             * The value of the injection
+             */
+            value: string;
+        }[];
+        /**
+         * The name of the dependency
+         */
+        name: string;
+        /**
+         * The index of the dependency
+         */
+        index: number;
+        /**
+         * The length of the dependency
+         */
+        length: number;
+        /**
+         * The content of the dependency
+         */
+        content?: string | undefined;
+    }[]): string;
     /**
      * Injects the dependencies into the rendered template
      * @param {string} rendered The rendered template
@@ -404,6 +556,10 @@ export default class MiniMD {
          * The length of the dependency
          */
         length: number;
+        /**
+         * The content of the dependency
+         */
+        content?: string | undefined;
     }[]): [string, string[]];
     /**
      * Builds the head of the rendered template
@@ -459,6 +615,10 @@ export default class MiniMD {
              * The length of the dependency
              */
             length: number;
+            /**
+             * The content of the dependency
+             */
+            content?: string | undefined;
         }[];
     }, depHeads: string[]): string;
     /**
@@ -517,6 +677,10 @@ export default class MiniMD {
              * The length of the dependency
              */
             length: number;
+            /**
+             * The content of the dependency
+             */
+            content?: string | undefined;
         }[];
     }): string;
     /**
@@ -547,6 +711,7 @@ export default class MiniMD {
      * @property {string} name The name of the dependency
      * @property {number} index The index of the dependency
      * @property {number} length The length of the dependency
+     * @property {string=} content The content of the dependency
      */
     /**
      * Represents head attributes that are in a comment on the first line of the template
@@ -622,6 +787,10 @@ export default class MiniMD {
              * The length of the dependency
              */
             length: number;
+            /**
+             * The content of the dependency
+             */
+            content?: string | undefined;
         }[];
     };
 }

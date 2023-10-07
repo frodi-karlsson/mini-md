@@ -507,106 +507,113 @@ export default class MiniMD {
   }
 
   /**
+   * Injects values into dependency templates
+   * @param {string} rendered The rendered template
+   * @param {Dependency[]} dependencies The dependencies to inject
+   * @returns {Dependency[]} The dependencies with the values injected
+   */
+  injectIntoDependencies(rendered, dependencies) {
+    dependencies.sort((a, b) => a.index - b.index);
+    let offSet = 0;
+    dependencies.forEach((dependency) => {
+      let depTemplate = this.getTemplate(dependency.name)?.content;
+      if (!depTemplate) {
+        Helpers.warn("Could not find dependency template: " + dependency.name);
+        return;
+      }
+      const injections = dependency.injections;
+      const injectionMarkers = depTemplate.matchAll(
+        new RegExp(`{{\\s*(.*)\\s*}}`, "g")
+      );
+      [...injectionMarkers].forEach((match) => {
+        const start = match.index + offSet;
+        const injectionKey = match[1].trim();
+        let value = injections.find(
+          (injection) => injection.name === injectionKey
+        )?.value;
+        if (!value) {
+          Helpers.warn(
+            "Could not find injection:",
+            injectionKey,
+            "for dependency:",
+            dependency.name
+          );
+          value = "";
+        }
+        depTemplate = Helpers.spliceSlice(
+          depTemplate,
+          start,
+          match[0].length,
+          value
+        );
+        offSet += value.length - match[0].length;
+        dependency.content = depTemplate;
+      });
+    });
+    return dependencies;
+  }
+
+  /**
+   * Creates head tags for the given dependencies
+   * @param {Dependency[]} dependencies The dependencies to create tags for
+   * @returns {string[]} The tags
+   */
+  makeDependencyTags(dependencies) {
+    const tags = [];
+    dependencies.forEach((dependency) => {
+      const template = this.getTemplate(dependency.name);
+      if (!template) {
+        Helpers.warn("Could not find dependency template:", dependency.name);
+        return;
+      }
+      const attrs = this.parseAttrs(template.content);
+      const scripts = this.makeScriptTags(template);
+      const head = this.buildHead("", "", scripts, attrs, []);
+      tags.push(head);
+    });
+    return tags;
+  }
+
+  /**
+   * Replaces dependencies with the content of the dependency
+   * @param {string} rendered The rendered template
+   * @param {Dependency[]} dependencies The dependencies to inject
+   * @returns {string} The rendered template with the dependencies injected
+   */
+  injectDependencies(rendered, dependencies) {
+    dependencies.sort((a, b) => a.index - b.index);
+    let offSet = 0;
+    dependencies.forEach((dependency) => {
+      const depTemplate =
+        dependency.content ?? this.getTemplate(dependency.name)?.content;
+      if (!depTemplate) {
+        Helpers.warn("Could not find dependency template: " + dependency.name);
+        return;
+      }
+      rendered = Helpers.spliceSlice(
+        rendered,
+        dependency.index + offSet,
+        dependency.length,
+        depTemplate
+      );
+      offSet += depTemplate.length - dependency.length;
+    });
+    return rendered;
+  }
+
+  /**
    * Injects the dependencies into the rendered template
    * @param {string} rendered The rendered template
    * @param {Dependency[]} dependencies The dependencies to inject
    * @returns {[string, string[]]} The rendered template and the tags to add to the head
    */
   addDependencies(rendered, dependencies) {
-    const offsetAdditions = [];
+    console.log("adding dependencies");
     const tags = [];
-    dependencies.sort((a, b) => a.index - b.index);
-    dependencies.forEach((dependency) => {
-      const iOffset = offsetAdditions
-        .filter((a) => a.start < dependency.index)
-        .reduce((acc, cur) => acc + cur.length, 0);
-      const start = rendered.slice(0, dependency.index + iOffset);
-      const end = rendered.slice(
-        dependency.index + iOffset + dependency.length
-      );
-      const rest = rendered.slice(
-        dependency.index + iOffset,
-        dependency.index + iOffset + dependency.length
-      );
-      const name = dependency.name;
-      const template = this.getTemplate(name);
-      if (!template) {
-        Helpers.warn("Could not find dependency template: " + name);
-        return;
-      }
-      let injectedContent = template.content;
-      dependency.injections.forEach((injection) => {
-        console.log("Injecting", injection.name, "into", name, "template");
-        const injectionMarker = injectedContent.matchAll(
-          new RegExp(`{{\\s*${injection.name}\\s*}}`, "g")
-        );
-        if (!injectionMarker) {
-          Helpers.warn(
-            "Could not find injection marker",
-            injection.name,
-            "in",
-            name,
-            "template"
-          );
-          return;
-        }
-        const injectionMarkerArray = [...injectionMarker];
-        injectionMarkerArray.forEach((match) => {
-          const start = match.index;
-          const end = match.index + match[0].length;
-          const before = injectedContent.slice(0, start);
-          const after = injectedContent.slice(end);
-          injectedContent = before + injection.value + after;
-          offsetAdditions.push({
-            start: dependency.index + iOffset + start,
-            length: injection.value.length - match[0].length,
-          });
-        });
-      });
-
-      const remainingInjections = injectedContent.matchAll(
-        new RegExp(`{{\\s*.*\\s*}}`, "g")
-      );
-      const remainingInjectionsArray = [...remainingInjections];
-      if (remainingInjectionsArray.length > 0) {
-        Helpers.warn(
-          "Found remaining injections in template",
-          name,
-          "template:",
-          remainingInjectionsArray.map((injection) => injection[0]).join(", ")
-        );
-      }
-      remainingInjectionsArray.forEach((match) => {
-        const start = match.index;
-        const end = match.index + match[0].length;
-        const before = injectedContent.slice(0, start);
-        const after = injectedContent.slice(end);
-        injectedContent = before + after;
-        offsetAdditions.push({
-          start: dependency.index + iOffset + start,
-          length: -match[0].length,
-        });
-      });
-
-      const rec = this.parseAttrs(this.getTemplate(dependency.name).content);
-      const { dependencies: recDependencies, ...recAttrs } = rec;
-      const [body, recTags] = this.addDependencies(
-        injectedContent,
-        recDependencies
-      );
-      const attrs = this.parseAttrs(injectedContent);
-      attrs.schemes = [...new Set([...attrs.schemes, ...recAttrs.schemes])];
-      const recScripts = this.makeScriptTags(this.getTemplate(dependency.name));
-      const head = this.buildHead("", "", recScripts, attrs, recTags);
-
-      const injected = start + body + end;
-      offsetAdditions.push({
-        start: dependency.index + iOffset,
-        length: body.length - rest.length,
-      });
-      rendered = injected;
-      tags.push(head);
-    });
+    dependencies = this.injectIntoDependencies(rendered, dependencies);
+    const dependencyTags = this.makeDependencyTags(dependencies);
+    rendered = this.injectDependencies(rendered, dependencies);
+    tags.push(...dependencyTags);
     return [rendered, tags];
   }
 
@@ -802,6 +809,7 @@ export default class MiniMD {
    * @property {string} name The name of the dependency
    * @property {number} index The index of the dependency
    * @property {number} length The length of the dependency
+   * @property {string=} content The content of the dependency
    */
   /**
    * Represents head attributes that are in a comment on the first line of the template

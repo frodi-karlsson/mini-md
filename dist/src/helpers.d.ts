@@ -21,4 +21,13 @@ export default class Helpers {
      * @returns {void}
      */
     static assign(obj: Record<string, any>, values: Record<string, any>): void;
+    /**
+     * "Splices" a string in the same way that Array.prototype.splice() does
+     * @param {string} str The string to splice
+     * @param {number} index The index to start splicing at
+     * @param {number} count The number of characters to remove
+     * @param {string} [add] The string to add
+     * @returns {string} The spliced string
+     */
+    static spliceSlice(str: string, index: number, count: number, add?: string): string;
 }

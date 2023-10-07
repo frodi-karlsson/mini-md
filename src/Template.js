@@ -27,4 +27,8 @@ export default class Template {
   get content() {
     return this._content;
   }
+
+  set content(value) {
+    this._content = value;
+  }
 }

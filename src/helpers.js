@@ -46,4 +46,24 @@ export default class Helpers {
       }
     }
   }
+
+  /**
+   * "Splices" a string in the same way that Array.prototype.splice() does
+   * @param {string} str The string to splice
+   * @param {number} index The index to start splicing at
+   * @param {number} count The number of characters to remove
+   * @param {string} [add] The string to add
+   * @returns {string} The spliced string
+   */
+  static spliceSlice(str, index, count, add) {
+    // We cannot pass negative indexes directly to the 2nd slicing operation.
+    if (index < 0) {
+      index = str.length + index;
+      if (index < 0) {
+        index = 0;
+      }
+    }
+
+    return str.slice(0, index) + (add || "") + str.slice(index + count);
+  }
 }
