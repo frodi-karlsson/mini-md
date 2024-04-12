@@ -10,7 +10,40 @@ yarn add mini-md
 
 ## Usage
 
-See the [examples](examples) folder for examples of how to use mini-md.
+In your typescript:
+
+```ts
+import express from "express";
+import path from "path";
+import { miniMd } from "mini-md";
+
+const app = express();
+app.use(
+  miniMd({
+    rootDir: path.resolve(__dirname, "md"),
+  })
+);
+
+app.listen(3000, () => {
+  console.log("Listening on port 3000");
+});
+```
+
+In `./md/fragments/header.md`:
+
+```md
+# So long
+```
+
+In `./md/index.md`:
+
+```md
+[](md:fragments/header.md)
+
+and thanks for all the fish!
+```
+
+See the [examples](examples) folder for more examples of how to use mini-md.
 
 # mini-md (mono)
 
