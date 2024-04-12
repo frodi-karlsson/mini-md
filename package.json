@@ -1,0 +1,8 @@
+{
+  "name": "mini-md",
+  "version": "1.0.0",
+  "description": "An express middleware that serves as a templating engine for markdown files",
+  "main": "index.ts",
+  "author": "frodi-karlsson",
+  "license": "MIT"
+}
