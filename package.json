@@ -1,8 +1,17 @@
 {
-  "name": "mini-md",
+  "name": "md-mono",
   "version": "1.0.0",
-  "description": "An express middleware that serves as a templating engine for markdown files",
-  "main": "index.ts",
+  "description": "A monorepo containing the examples as well as mini-md",
+  "main": "index.js",
   "author": "frodi-karlsson",
-  "license": "MIT"
+  "private": true,
+  "license": "MIT",
+  "workspaces": [
+    "mini-md",
+    "examples/*"
+  ],
+  "scripts": {
+    "deploy": "yarn workspace mini-md deploy",
+    "pub": "yarn workspace mini-md publish"
+  }
 }
