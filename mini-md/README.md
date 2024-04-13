@@ -20,7 +20,7 @@ import { miniMd } from "mini-md";
 const app = express();
 app.use(
   miniMd({
-    rootDir: path.resolve(__dirname, "md"),
+    rootDir: "md"
   })
 );
 
