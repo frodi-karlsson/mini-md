@@ -4,7 +4,7 @@ import {
   _objectAssign
 } from '@naturalcycles/js-lib'
 import { fs2 } from '@naturalcycles/nodejs-lib'
-import MarkdownIt from 'markdown-it'
+import MarkdownIt, { Token } from 'markdown-it'
 import path from 'node:path'
 
 const options: any = {}
@@ -14,13 +14,6 @@ const getSetting = (
   defaultValue?: any
 ) => {
   return options.settings?.[option] ?? defaultValue
-}
-
-const clearOptions = () => {
-  var props = Object.getOwnPropertyNames(options)
-  for (var i = 0; i < props.length; i++) {
-    delete options[props[i]]
-  }
 }
 
 interface MiniMdProps {
@@ -78,33 +71,137 @@ const readMarkdownFile = (
   return fs2.readText(resolved)
 }
 
-const getRendererRule = (
-  md: MarkdownIt
-): MarkdownIt.Renderer.RenderRule => {
-  return (tokens, idx, options, env, self) => {
-    const token = tokens[idx]
-    const href = token.attrGet('href')
-    if (href && href.startsWith('md:')) {
-      log(
-        '[miniMd] Found reference to another markdown file',
-        href
-      )
-
-      const referencedFile = readMarkdownFile(href.slice(3))
-      log('[miniMd] Referenced file', referencedFile)
-
-      if (referencedFile) {
-        return md.render(referencedFile, { ...env })
-      }
-    }
-    return self.renderToken(tokens, idx, options)
-  }
-}
-
 let log: (...args: any[]) => void = () => {}
 
+/**
+ * Creates an empty head html_block token at the beginning of the tokens array.
+ */
+const headPlugin = (md: MarkdownIt) => {
+  md.core.ruler.push('head', (state) => {
+    log('[miniMd] Running head plugin')
+
+    const { env } = state
+    if (env.skipCustom) {
+      console.log('[miniMd] Skipping head plugin')
+      return
+    }
+    const { tokens } = state
+    const existsAlready = tokens.some(
+      (token) =>
+        token.type === 'html_block' &&
+        token.meta?.miniMdHead
+    )
+    if (existsAlready) {
+      log('[miniMd] head token already exists')
+      return
+    }
+    log('[miniMd] Creating head token')
+    tokens.unshift({
+      type: 'html_block',
+      content: '<head></head>',
+      block: true,
+      meta: {
+        miniMdHead: true
+      }
+    } as Token)
+  })
+}
+
+/**
+ * Moves the contents of <head> html_block tokens to the mini-md head
+ */
+const moveToHeadPlugin = (md: MarkdownIt) => {
+  md.core.ruler.push('moveHead', (state) => {
+    log('[miniMd] Running moveToHead plugin')
+
+    const { env } = state
+    if (env.skipCustom) {
+      console.log('[miniMd] Skipping moveToHead plugin')
+      return
+    }
+    const { tokens } = state
+    log('[miniMd] tokens', tokens)
+    const miniMdHead = tokens.find(
+      (token) =>
+        token.type === 'html_block' &&
+        token.meta?.miniMdHead
+    )
+
+    if (!miniMdHead) {
+      console.warn(
+        '[miniMd] Could not find miniMd head token. Make sure that the head plugin is enabled.'
+      )
+      return
+    }
+
+    const headTokens = tokens
+      .map((token, i) => ({ token, i }))
+      .filter(
+        ({ token }) =>
+          token.type === 'html_block' &&
+          !token.meta?.miniMdHead
+      )
+      .map(({ token, i }) => ({
+        token: {
+          ...token,
+          content: token.content
+            .replace('<head>', '')
+            .replace('</head>', '')
+        } as Token,
+        i
+      }))
+    log('[miniMd] headTokens', headTokens)
+    headTokens.forEach(({ token, i }) => {
+      tokens.splice(i, 1)
+      log('[miniMd] head before', miniMdHead.content)
+      miniMdHead.content = miniMdHead.content.replace(
+        '</head>',
+        token.content + '</head>'
+      )
+      log('[miniMd] head after', miniMdHead.content)
+    })
+  })
+}
+
+/**
+ * The meat of the templating engine. It injects other markdown files into the current one.
+ *
+ * \[md:file.md\] will be replaced with the contents of file.md.
+ */
 const miniMdPlugin = (md: MarkdownIt) => {
-  md.renderer.rules.link_open = getRendererRule(md)
+  md.core.ruler.push('miniMd', (state) => {
+    log('[miniMd] Running miniMd plugin')
+    const { tokens } = state
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i]
+      if (token.type === 'inline') {
+        const { children } = token
+        const newChildren: Token[] = []
+        const open = children?.find(
+          (child) =>
+            child.type === 'link_open' &&
+            child.attrGet('href')?.startsWith('md:')
+        )
+        if (open) {
+          const href = open.attrGet('href')
+          _assert(href)
+          const filePath = href.slice(3)
+          const markdownFile = readMarkdownFile(filePath)
+          if (markdownFile) {
+            tokens.splice(
+              i,
+              1,
+              ...[
+                ...md.parse(markdownFile, {
+                  skipCustom: true
+                })
+              ]
+            )
+          }
+        }
+      }
+    }
+  })
 }
 
 /**
@@ -117,13 +214,15 @@ export const miniMd = (props?: MiniMdProps): ViewEngine => {
     plugins = []
   } = props ?? {}
   const md = new MarkdownIt(mdOptions)
+  md.use(miniMdPlugin)
+  md.use(headPlugin)
+  md.use(moveToHeadPlugin)
+
   plugins.forEach((plugin) => {
     md.use(plugin)
   })
 
   log = verbose ? console.log : () => {}
-
-  md.use(miniMdPlugin)
 
   return async (
     path: string,

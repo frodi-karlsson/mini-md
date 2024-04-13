@@ -9,8 +9,10 @@ app.engine(
   'md',
   miniMd({
     mdOptions: {
-      html: true
+      html: true,
+      xhtmlOut: true
     },
+    verbose: true,
     plugins: [markdownItAttrs]
   })
 )
