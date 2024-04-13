@@ -1,6 +1,6 @@
 # mini-md
 
-A templating engine for markdown files. It's made for compatibility with express, and is a great way to build simple websites.
+A view engine / template engine for express that can serve your markdown files as HTML.
 
 ## Installation
 

@@ -1,6 +1,6 @@
 # mini-md
 
-A middleware for express that can serve your markdown files as HTML. It's by no means a polished product, but it's a fun little project that I've been working on.
+A view engine / template engine for express that can serve your markdown files as HTML.
 
 ## The Package
 
