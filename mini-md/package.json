@@ -5,7 +5,11 @@
   "main": "index.ts",
   "author": "frodi-karlsson <frodikarlsson@gmail.com>",
   "license": "MIT",
-  "keywords": ["express", "markdown", "templating"],
+  "keywords": [
+    "express",
+    "markdown",
+    "templating"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/frodi-karlsson/mini-md"
