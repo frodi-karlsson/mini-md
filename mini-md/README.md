@@ -1,11 +1,19 @@
 # mini-md
 
-A middleware for express that can serve your markdown files as HTML. It's by no means a polished product, but it's a fun little project that I've been working on.
+A templating engine for markdown files. It's made for compatibility with express, and is a great way to build simple websites.
 
 ## Installation
 
 ```bash
 yarn add mini-md
+```
+
+## Syntax
+
+You can reference other markdown files in your markdown files by using the following syntax:
+
+```md
+[](md:path/to/file.md)
 ```
 
 ## Usage
@@ -18,14 +26,11 @@ import path from "path";
 import { miniMd } from "mini-md";
 
 const app = express();
-app.use(
-  miniMd({
-    rootDir: "md"
-  })
-);
+app.engine("md", miniMd());
+app.set("views", "views");
 
-app.listen(3000, () => {
-  console.log("Listening on port 3000");
+app.get("/", (req, res) => {
+  res.render("index.md");
 });
 ```
 
@@ -43,4 +48,4 @@ In `./md/index.md`:
 and thanks for all the fish!
 ```
 
-See the [examples](../examples) folder for more examples of how to use mini-md.
+See the [examples](../examples) if you want to see it in action.

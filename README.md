@@ -2,50 +2,11 @@
 
 A middleware for express that can serve your markdown files as HTML. It's by no means a polished product, but it's a fun little project that I've been working on.
 
-## Installation
+## The Package
 
-```bash
-yarn add mini-md
-```
+See [mini-md](mini-md) for information on the package itself.
 
-## Usage
-
-In your typescript:
-
-```ts
-import express from "express";
-import path from "path";
-import { miniMd } from "mini-md";
-
-const app = express();
-app.use(
-  miniMd({
-    rootDir: "md"
-  })
-);
-
-app.listen(3000, () => {
-  console.log("Listening on port 3000");
-});
-```
-
-In `./md/fragments/header.md`:
-
-```md
-# So long
-```
-
-In `./md/index.md`:
-
-```md
-[](md:fragments/header.md)
-
-and thanks for all the fish!
-```
-
-See the [examples](examples) folder for more examples of how to use mini-md.
-
-# mini-md (mono)
+## mini-md (mono)
 
 This is a mono repo for mini-md. It contains the following packages:
 
@@ -54,13 +15,13 @@ This is a mono repo for mini-md. It contains the following packages:
   - [Basic](examples/basic) - A basic example of mini-md.
   - [Advanced](examples/advanced) - An advanced example of mini-md.
 
-## Installation
+### Installation
 
 ```bash
 yarn
 ```
 
-## Running the examples
+### Running the examples
 
 ```bash
 yarn workspace <basic|advanced> dev

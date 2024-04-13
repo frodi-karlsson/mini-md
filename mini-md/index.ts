@@ -1,30 +1,29 @@
-import { type RequestHandler } from 'express'
-import { _assert } from '@naturalcycles/js-lib'
-import path from 'node:path'
+import {
+  _assert,
+  _jsonEquals,
+  _objectAssign
+} from '@naturalcycles/js-lib'
 import { fs2 } from '@naturalcycles/nodejs-lib'
-import MarkdownIt, { PluginSimple } from 'markdown-it'
-import { minimatch } from 'minimatch'
+import MarkdownIt from 'markdown-it'
+import path from 'node:path'
+
+const options: any = {}
+
+const getSetting = (
+  option: string | number | symbol,
+  defaultValue?: any
+) => {
+  return options.settings?.[option] ?? defaultValue
+}
+
+const clearOptions = () => {
+  var props = Object.getOwnPropertyNames(options)
+  for (var i = 0; i < props.length; i++) {
+    delete options[props[i]]
+  }
+}
 
 interface MiniMdProps {
-  /**
-   * Root directory where markdown files are located.
-   */
-  rootDir: string
-  /**
-   * If true, various information will be console.logged.
-   * Defaults to false.
-   */
-  verbose?: boolean
-  /**
-   * Glob for matching files that shouldn't be paths.
-   * Defaults to '\*\*\/fragments\/\*\*\/\*.md'.
-   */
-  fragments?: string
-  /**
-   * Whether the paths should have markdown extensions.
-   * Defaults to false.
-   */
-  markdownExtensions?: boolean
   /**
    * Options for the markdown-it instance.
    * Defaults to an empty object.
@@ -34,67 +33,89 @@ interface MiniMdProps {
    * Plugins you want to add to the markdown-it instance.
    * Defaults to an empty array.
    */
-  plugins?: (MarkdownIt.PluginSimple | MarkdownIt.PluginWithOptions | MarkdownIt.PluginWithParams)[]
+  plugins?: (
+    | MarkdownIt.PluginSimple
+    | MarkdownIt.PluginWithOptions
+    | MarkdownIt.PluginWithParams
+  )[]
+  /**
+   * If true, various information will be console.logged.
+   * Defaults to false.
+   */
+  verbose?: boolean
 }
 
-const trimSlashes = (s: string) =>
-  s.replace(/^\/+|\/+$/g, '')
+type ViewEngine = (
+  path: string,
+  options: any,
+  callback: (e: any, rendered?: string | undefined) => void
+) => void
 
-const readMarkdownFile = (filePath: string): string | null => {
-  if (!fs2.pathExists(filePath) || !filePath.endsWith('.md')) {
+const readMarkdownFile = (
+  filePath: string
+): string | null => {
+  const views = getSetting('views', '')
+  log('[miniMd] views', views)
+
+  const resolved = path.resolve(
+    process.cwd(),
+    views,
+    filePath
+  )
+
+  log('[miniMd] resolved', resolved)
+
+  if (
+    !fs2.pathExists(resolved) ||
+    !resolved.endsWith('.md')
+  ) {
+    log(
+      '[miniMd] File does not exist or is not an .md file'
+    )
     return null
   }
 
-  return fs2.readText(filePath)
+  return fs2.readText(resolved)
 }
 
-let log: (...args: any[]) => void = () => {}
-
-const getMiniMdPlugin = (resolved: string) => (md: MarkdownIt) => {
-  const defaultRender =
-    md.renderer.rules.link_open ||
-    function (tokens, idx, options, env, self) {
-      return self.renderToken(tokens, idx, options)
-    }
-  md.renderer.rules.link_open = function (
-    tokens,
-    idx,
-    options,
-    env,
-    self
-  ) {
-    log(
-      '[miniMd] found link',
-      tokens[idx].attrGet('href')
-    )
-    const href = tokens[idx].attrGet('href')
+const getRendererRule = (
+  md: MarkdownIt
+): MarkdownIt.Renderer.RenderRule => {
+  return (tokens, idx, options, env, self) => {
+    const token = tokens[idx]
+    const href = token.attrGet('href')
     if (href && href.startsWith('md:')) {
-      // replace the link with the parsed markdown content
-      // of the referenced file
-      const filePath = href.slice(3)
-      log('[miniMd] referenced file', filePath)
-      const referencedFile = readMarkdownFile(
-        path.resolve(resolved, filePath)
+      log(
+        '[miniMd] Found reference to another markdown file',
+        href
       )
+
+      const referencedFile = readMarkdownFile(href.slice(3))
+      log('[miniMd] Referenced file', referencedFile)
+
       if (referencedFile) {
         return md.render(referencedFile, { ...env })
       }
     }
-    return defaultRender(tokens, idx, options, env, self)
+    return self.renderToken(tokens, idx, options)
   }
+}
+
+let log: (...args: any[]) => void = () => {}
+
+const miniMdPlugin = (md: MarkdownIt) => {
+  md.renderer.rules.link_open = getRendererRule(md)
 }
 
 /**
  * Express middleware that serves markdown files from the specified root directory.
  */
-export const miniMd = ({
-  rootDir,
-  mdOptions = {},
-  verbose,
-  fragments = '**/fragments/**/*.md',
-  markdownExtensions = false,
-  plugins = []
-}: MiniMdProps): RequestHandler => {
+export const miniMd = (props?: MiniMdProps): ViewEngine => {
+  const {
+    mdOptions = {},
+    verbose,
+    plugins = []
+  } = props ?? {}
   const md = new MarkdownIt(mdOptions)
   plugins.forEach((plugin) => {
     md.use(plugin)
@@ -102,39 +123,27 @@ export const miniMd = ({
 
   log = verbose ? console.log : () => {}
 
-  const resolved = path.resolve(rootDir)
-  log('[miniMd] resolved rootDir', resolved)
+  md.use(miniMdPlugin)
 
-  const isDir = path.extname(resolved) === ''
-  _assert(isDir, `rootDir must be a directory: ${rootDir}`)
-
-  md.use(getMiniMdPlugin(resolved))
-
-  return async (req, res, next) => {
-    log('[miniMd] req.path', req.path)
-    const filePath =
-        path.resolve(
-          resolved,
-        // We add markdown extensions if we don't expect them to be in the paths
-          trimSlashes(req.path === '/' ? '/index' : req.path)+ (markdownExtensions ? '' : '.md')
-        )
-    if (minimatch(filePath, fragments)) {
-      log('[miniMd] skipping fragments')
-      return next()
-    }
-    log('[miniMd] filePath', filePath)
-    const markdownFile = readMarkdownFile(filePath)
+  return async (
+    path: string,
+    rendererOptions,
+    callback
+  ) => {
+    log('[miniMd] Received options', rendererOptions)
+    _objectAssign(options, rendererOptions)
+    log('[miniMd] Received path', path)
+    const markdownFile = readMarkdownFile(path)
     log('[miniMd] markdownFile', markdownFile)
 
     if (markdownFile) {
-      const stream = res.send(
-        md.render(markdownFile)
-      )
-      stream.on('error', (err) => {
-        log('[miniMd] stream error', err)
-      })
-      return stream
+      try {
+        const rendered = md.render(markdownFile)
+        console.log('[miniMd] rendered', rendered)
+        callback(null, rendered)
+      } catch (e) {
+        callback(e)
+      }
     }
-    next()
   }
 }
