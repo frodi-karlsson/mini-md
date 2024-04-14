@@ -16,11 +16,6 @@ This example uses a custom CSS file to style the HTML output. The CSS file is li
 where fragments/head.md is:
 
 ```html
-````
-
-where fragments/head.md is:
-
-```html
 <head>
     <meta name="description" content="This is an advanced example of mini-md." />
     <title>{curly-open}title}</title>
