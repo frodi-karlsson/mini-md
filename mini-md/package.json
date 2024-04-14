@@ -1,6 +1,6 @@
 {
   "name": "mini-md",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "An express view engine that serves as a templating engine for markdown files",
   "main": "index.ts",
   "author": "frodi-karlsson <frodikarlsson@gmail.com>",
