@@ -4,7 +4,9 @@ import {
   _isNullish,
   _stringEnumValues,
   _first,
-  _last
+  _last,
+  _numberEnumValue,
+  _numberEnumEntries
 } from '@naturalcycles/js-lib'
 import MarkdownIt, { Token } from 'markdown-it'
 import { MiniMdMeta, TagType, Nesting, Rule } from './types'
@@ -16,25 +18,16 @@ import {
   logger,
   readMarkdownFile
 } from './util'
-import { pluginOrder } from './const'
+import { PluginOrder } from './const'
 
-const ruleRegister: Partial<
-  Record<(typeof pluginOrder)[number], Rule>
-> = {}
-
-const registerRule = (
-  name: (typeof pluginOrder)[number],
-  rule: Rule
-) => {
-  ruleRegister[name] = rule
-}
+let ruleRegister: Record<PluginOrder, Rule> | null = null
 
 /**
  * Creates an html structure for the document.
  * Simply creates opening and closing tags for the head, body, and html tags.
  */
-export const registerHtmlPlugin = () => {
-  registerRule('html-structure', {
+export const getHtmlPlugin = (): Rule => {
+  return {
     type: 'core',
     rule: (state) => {
       logger.log('Running html plugin')
@@ -72,7 +65,7 @@ export const registerHtmlPlugin = () => {
       tokens.unshift(html)
       return false
     }
-  })
+  }
 }
 
 /**
@@ -136,36 +129,36 @@ export const initMovePluginInternal = (
  * Moves html tokens into the specified tag
  * if they match the specified criteria.
  */
-export const registerMovePlugin = (
+export const getMovePlugin = (
   intoTag: TagType,
   takeTokens: (tokens: Token[]) => number[],
-  name: (typeof pluginOrder)[number],
+  plugin: PluginOrder,
   processTokens?: (tokens: Token[]) => Token[]
-) => {
-  registerRule(name, {
+): Rule => {
+  return {
     type: 'core',
     rule: (state) => {
       if (state.env.skipCustom) {
-        logger.log('Skipping custom rules for', name)
+        logger.log(
+          'Skipping custom rules for',
+          PluginOrder[plugin]
+        )
         return false
       }
       const { tokens } = state
       initMovePluginInternal(
         intoTag,
         takeTokens,
-        name,
+        PluginOrder[plugin],
         processTokens
       )(tokens)
       return false
     }
-  })
+  }
 }
 
-/**
- * Renders the html token during rendering.
- */
-export const registerRenderHtmlPlugin = () => {
-  registerRule('render-html:head', {
+const getRenderHeadPlugin = (): Rule => {
+  return {
     type: 'renderer',
     token: TagType.head,
     rule: (tokens, index, options, env, self) => {
@@ -180,9 +173,10 @@ export const registerRenderHtmlPlugin = () => {
           : ''
       }</head>`
     }
-  })
-
-  registerRule('render-html:body', {
+  }
+}
+const getRenderBodyPlugin = (): Rule => {
+  return {
     type: 'renderer',
     token: TagType.body,
     rule: (tokens, index, options, env, self) => {
@@ -205,9 +199,11 @@ export const registerRenderHtmlPlugin = () => {
           : ''
       }</body>`
     }
-  })
+  }
+}
 
-  registerRule('render-html:html', {
+const getRenderHtmlPlugin = (): Rule => {
+  return {
     type: 'renderer',
     token: TagType.html,
     rule: (tokens, index, options, env, self) => {
@@ -224,7 +220,7 @@ export const registerRenderHtmlPlugin = () => {
           : ''
       }</html>`
     }
-  })
+  }
 }
 
 /**
@@ -232,8 +228,8 @@ export const registerRenderHtmlPlugin = () => {
  *
  * \[md:file.md\] will be replaced with the contents of file.md.
  */
-export const registerMiniMdPlugin = () => {
-  registerRule('miniMd', {
+export const getMiniMdPlugin = (): Rule => {
+  return {
     type: 'core',
     rule: (state) => {
       logger.log('Running miniMd plugin')
@@ -275,7 +271,7 @@ export const registerMiniMdPlugin = () => {
         })
       return false
     }
-  })
+  }
 }
 
 /**
@@ -283,96 +279,108 @@ export const registerMiniMdPlugin = () => {
  * Order is predetermined by the pluginOrder array.
  */
 export const registerRules = () => {
-  registerHtmlPlugin()
-  registerMovePlugin(
-    TagType.head,
-    (tokens) =>
-      tokens
-        .map((_, i) => i)
-        .filter(
+  ruleRegister = {
+    [PluginOrder['html-structure']]: getHtmlPlugin(),
+    [PluginOrder.miniMd]: getMiniMdPlugin(),
+    [PluginOrder['move-head']]: getMovePlugin(
+      TagType.head,
+      (tokens) =>
+        tokens
+          .map((_, i) => i)
+          .filter(
+            (token) =>
+              tokens[token].type === 'html_block' &&
+              tokens[token].content
+                ?.trim()
+                .startsWith('<head>')
+          ),
+      PluginOrder['move-head'],
+      (tokens) =>
+        tokens.map(
           (token) =>
-            tokens[token].type === 'html_block' &&
-            tokens[token].content
-              ?.trim()
-              .startsWith('<head>')
-        ),
-    'move-head',
-    (tokens) =>
-      tokens.map(
-        (token) =>
-          ({
-            ...token,
-            content: token.content
-              ?.replace('<head>', '')
-              .replace('</head>', '')
-          }) as Token
-      )
-  )
-  registerMovePlugin(
-    TagType.body,
-    (tokens) =>
-      tokens
-        .map((_, i) => i)
-        .filter(
-          (token) =>
-            !_stringEnumValues(MiniMdMeta).some((meta) =>
-              isMiniMdToken(tokens[token], meta)
-            )
-        ),
-    'move-body'
-  )
-  registerRenderHtmlPlugin()
-  registerMiniMdPlugin()
+            ({
+              ...token,
+              content: token.content
+                ?.replace('<head>', '')
+                .replace('</head>', '')
+            }) as Token
+        )
+    ),
+    [PluginOrder['move-body']]: getMovePlugin(
+      TagType.body,
+      (tokens) =>
+        tokens
+          .map((_, i) => i)
+          .filter(
+            (token) =>
+              !_stringEnumValues(MiniMdMeta).some((meta) =>
+                isMiniMdToken(tokens[token], meta)
+              )
+          ),
+      PluginOrder['move-body']
+    ),
+    [PluginOrder['render-html:head']]:
+      getRenderHeadPlugin(),
+    [PluginOrder['render-html:body']]:
+      getRenderBodyPlugin(),
+    [PluginOrder['render-html:html']]: getRenderHtmlPlugin()
+  }
 }
 
 /**
  * Applies all rules in order to the markdown-it instance.
  */
 export const applyRules = (md: MarkdownIt) => {
-  pluginOrder.forEach((name) => {
-    const rule = ruleRegister[name]
-    _assert(rule, 'Rule not registered yet: ' + name)
-    const previousOfType = pluginOrder
-      .slice(0, pluginOrder.indexOf(name))
-      .reverse()
-      .find((n) => ruleRegister[n]!.type === rule.type)
-    switch (rule.type) {
-      case 'core':
-        if (previousOfType) {
-          md.core.ruler.after(
-            previousOfType,
-            name,
-            rule.rule
-          )
-        } else {
-          md.core.ruler.push(name, rule.rule)
-        }
-        break
-      case 'block':
-        if (previousOfType) {
-          md.block.ruler.after(
-            previousOfType,
-            name,
-            rule.rule
-          )
-        } else {
-          md.block.ruler.push(name, rule.rule)
-        }
-        break
-      case 'inline':
-        if (previousOfType) {
-          md.inline.ruler.after(
-            previousOfType,
-            name,
-            rule.rule
-          )
-        } else {
-          md.inline.ruler.push(name, rule.rule)
-        }
-        break
-      case 'renderer':
-        md.renderer.rules[rule.token] = rule.rule
-        break
+  _assert(
+    ruleRegister,
+    'Rules should be registered before applying'
+  )
+  _numberEnumEntries(PluginOrder).forEach(
+    ([name, value]) => {
+      const rule =
+        ruleRegister![_numberEnumValue(PluginOrder, name)]
+      const previousOfType = _numberEnumEntries(PluginOrder)
+        .filter(([_, v]) => v < value)
+        .reverse()
+        .find((n) => ruleRegister![n[1]].type === rule.type)
+      switch (rule.type) {
+        case 'core':
+          if (previousOfType) {
+            md.core.ruler.after(
+              previousOfType[0],
+              name,
+              rule.rule
+            )
+          } else {
+            md.core.ruler.push(name, rule.rule)
+          }
+          break
+        case 'block':
+          if (previousOfType) {
+            md.block.ruler.after(
+              previousOfType[0],
+              name,
+              rule.rule
+            )
+          } else {
+            md.block.ruler.push(name, rule.rule)
+          }
+          break
+        case 'inline':
+          if (previousOfType) {
+            md.inline.ruler.after(
+              previousOfType[0],
+              name,
+              rule.rule
+            )
+          } else {
+            md.inline.ruler.push(name, rule.rule)
+          }
+          break
+        case 'renderer':
+          md.renderer.rules[rule.token] = rule.rule
+          break
+      }
     }
-  })
+  )
 }
