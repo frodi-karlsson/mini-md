@@ -48,12 +48,3 @@ app.get("/", (req, res) => {
 ```
 
 Here's that message: {msg}
-
-## How does it work?
-
-Well, this md file is passing two things to the `mini-md` package:
-
-- The `markdown-it-attrs` plugin
-- The `mdOptions` object with the `html` property set to `true`
-
-it's also serving the `public` folder as a static folder, so the `style.css` file can be accessed by the HTML output.
