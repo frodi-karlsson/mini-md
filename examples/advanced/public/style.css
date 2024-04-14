@@ -55,7 +55,6 @@ pre code li[class^="L"]:hover {
 }
 
 .welcome {
-    font-size: 20px;
     text-align: center;
     animation: bounce 2s infinite;
 }

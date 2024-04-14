@@ -77,10 +77,9 @@ export const getLinkWithAttrsPlugin = (): Rule => {
   return {
     type: 'core',
     rule: (state) => {
-      const { tokens, md } = state
-      const { helpers } = md
-      const hrefSplitRegex = /(?!\\),/
-      const attrSplitRegex = /(?!\\)=/
+      const { tokens } = state
+      const hrefSplitRegex = /(?<!\\),/
+      const attrSplitRegex = /(?<!\\)=/
       const hrefContentRegex = /\((md:.*)\)/
 
       tokens.forEach((token) => {
@@ -373,7 +372,9 @@ export const getMiniMdPlugin = (): Rule => {
           ...hrefs
             .map((child) => {
               const { href, meta } = child
-              _assert(href, 'Href should be defined')
+              if (!href) {
+                return []
+              }
               logger.log('Found href', href)
               const { attrs } = meta ?? {}
               const markdownFile = readMarkdownFile(
@@ -390,20 +391,20 @@ export const getMiniMdPlugin = (): Rule => {
             .flat()
         )
       }
-      tokens
-        .map((_, i) => i)
-        .filter(
-          (token) =>
-            tokens[token].type === 'inline' &&
-            tokens[token].children?.some(
-              (child) =>
-                child.type === 'link_open' &&
-                child.attrGet('href')?.startsWith('md:')
-            )
-        )
-        .forEach((token) => {
-          handleToken(token)
-        })
+      let i = 0
+      while (i < tokens.length) {
+        if (
+          tokens[i].type === 'inline' &&
+          tokens[i].children?.some(
+            (child) =>
+              child.type === 'link_open' &&
+              child.attrGet('href')?.startsWith('md:')
+          )
+        ) {
+          handleToken(i)
+        }
+        i++
+      }
       return false
     }
   }

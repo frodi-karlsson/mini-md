@@ -49,7 +49,6 @@ export const readMarkdownFile = (
   filePath: string,
   attrs: Record<string, string> = {}
 ): string | null => {
-  // Make equal signs escapeable.
   const views = getSetting('views', '')
   logger.log('views', views)
   logger.log('filePath', filePath)
