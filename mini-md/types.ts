@@ -1,5 +1,3 @@
-import { Token } from 'markdown-it'
-
 export enum Nesting {
   open = 1,
   close = -1,
