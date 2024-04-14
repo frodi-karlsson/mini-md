@@ -12,6 +12,12 @@
   ],
   "scripts": {
     "deploy": "yarn workspace mini-md deploy",
-    "pub": "yarn workspace mini-md publish"
+    "pub": "yarn workspace mini-md publish",
+    "lint": "yarn workspace mini-md lint"
+  },
+  "pre-commit": ["lint"],
+  "pre-commit.silent": true,
+  "devDependencies": {
+    "pre-commit": "^1.2.2"
   }
 }
