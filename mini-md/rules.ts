@@ -18,8 +18,6 @@ import {
 } from './util'
 import { pluginOrder } from './const'
 
-let allRules: Rule[] = []
-
 const ruleRegister: Partial<
   Record<(typeof pluginOrder)[number], Rule>
 > = {}
@@ -29,19 +27,6 @@ const registerRule = (
   rule: Rule
 ) => {
   ruleRegister[name] = rule
-}
-
-const enableOnlyOurRules = (md: MarkdownIt) => {
-  md.disable([...allRules.map((rule) => rule.rule.name)])
-  pluginOrder.forEach((name) => {
-    md.enable(name)
-  })
-}
-
-const enableAllRules = (md: MarkdownIt) => {
-  allRules.forEach((rule) => {
-    md.enable(rule.rule.name)
-  })
 }
 
 /**
@@ -389,19 +374,5 @@ export const applyRules = (md: MarkdownIt) => {
         md.renderer.rules[rule.token] = rule.rule
         break
     }
-  })
-}
-
-/**
- * Saves all rules in the markdown-it instance to a global variable.
- * This is so we can enable all of them at once in rules.
- */
-export const saveAllRules = (md: MarkdownIt) => {
-  const ruleGroups = ['core', 'block', 'inline'] as const
-  ruleGroups.forEach((chain) => {
-    allRules = allRules.concat(
-      // Evil operations to get around the fact that the rules are private.
-      (md as any)[chain].ruler.__rules__ || []
-    )
   })
 }

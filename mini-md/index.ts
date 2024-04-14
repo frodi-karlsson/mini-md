@@ -14,11 +14,7 @@ import {
 import MarkdownIt from 'markdown-it'
 import { MiniMdProps, ViewEngine } from './types'
 import { logger, options, readMarkdownFile } from './util'
-import {
-  applyRules,
-  registerRules,
-  saveAllRules
-} from './rules'
+import { applyRules, registerRules } from './rules'
 
 /**
  * Express middleware that serves markdown files from the specified root directory.
@@ -36,10 +32,8 @@ export const miniMd = (props?: MiniMdProps): ViewEngine => {
   const md = new MarkdownIt(mdOptions)
   // Initializes our custom rules into a record.
   registerRules()
-  // Applies all of our custom rules to the markdown-it instance in order.
+  // Applies all of our custom rules to the markdown-it instance in correct order.
   md.use(applyRules)
-  // Saves every rule in the md instance so we can enable them all at once later.
-  saveAllRules(md)
 
   // Adds any additional plugins to the markdown-it instance.
   plugins.forEach((plugin) => {
