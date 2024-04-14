@@ -12,8 +12,8 @@ This is a mono repo for mini-md. It contains the following packages:
 
 - [mini-md](mini-md) - The core package for mini-md.
 - [Examples](examples) - Examples of mini-md in action.
-  - [Basic](examples/basic) - A basic example of mini-md.
-  - [Advanced](examples/advanced) - An advanced example of mini-md.
+  - [Basic](examples/basic) - A basic example of mini-md that just serves a markdown file that includes another markdown file.
+  - [Advanced](examples/advanced) - An advanced example of mini-md. It serves a markdown file that styles the body tag, adds head tags and uses template bindings.
 
 ### Installation
 

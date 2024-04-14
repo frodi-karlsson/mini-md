@@ -10,9 +10,12 @@
     justify-content: center;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 code {
     background-color: #444;
-    padding: 4px;
     border-radius: 4px;
 }
 

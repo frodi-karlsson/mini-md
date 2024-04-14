@@ -6,7 +6,8 @@ import {
   _first,
   _last,
   _numberEnumValue,
-  _numberEnumEntries
+  _numberEnumEntries,
+  AnyObject
 } from '@naturalcycles/js-lib'
 import MarkdownIt, { Token } from 'markdown-it'
 import { MiniMdMeta, TagType, Nesting, Rule } from './types'
@@ -69,6 +70,69 @@ export const getHtmlPlugin = (): Rule => {
 }
 
 /**
+ * Modification to allow link_open tokens to have attributes.
+ * Attributes are declared as [](href, attr1=val1, attr2=val2).
+ */
+export const getLinkWithAttrsPlugin = (): Rule => {
+  return {
+    type: 'core',
+    rule: (state) => {
+      const { tokens, md } = state
+      const { helpers } = md
+      const hrefSplitRegex = /(?!\\),/
+      const attrSplitRegex = /(?!\\)=/
+      const hrefContentRegex = /\((md:.*)\)/
+
+      tokens.forEach((token) => {
+        if (token.type === 'inline') {
+          token.children?.forEach((child, i) => {
+            if (
+              child.type === 'text' &&
+              child.content.match(hrefContentRegex)
+            ) {
+              logger.log('Found text token', child)
+              child.type = 'link_open'
+              child.nesting = Nesting.open
+              child.tag = 'a'
+              const [href, ...attrs] = child.content
+                .match(hrefContentRegex)![1]
+                .split(hrefSplitRegex)
+              child.content = ''
+              child.attrSet('href', href)
+              logger.log('Setting href', href)
+              child.meta = {
+                ...(child.meta ?? {}),
+                attrs: {
+                  ...(child.meta?.attrs ?? {}),
+                  ...attrs.reduce<AnyObject>(
+                    (acc, attr) => {
+                      const [key, val] =
+                        attr.split(attrSplitRegex)
+                      acc[key.trim()] = val.trim()
+                      return acc
+                    },
+                    {}
+                  )
+                }
+              }
+
+              token.children?.splice(
+                i + 1,
+                0,
+                new state.Token(
+                  'link_close',
+                  'a',
+                  Nesting.close
+                )
+              )
+            }
+          })
+        }
+      })
+    }
+  }
+}
+/**
  * Captures <body ...> and <html ...> tags, removes them, and stores their attributes
  * in their respective tokens.
  */
@@ -84,33 +148,38 @@ export const getCaptureAttrsPlugin = (): Rule => {
         return false
       }
       const { tokens } = state
-      tokens.forEach((token) => {
+      tokens.forEach((token, i) => {
         if (token.type === 'html_block') {
           logger.log('Found html_block token', token)
-          if (token.content?.trim().startsWith('<html')) {
-            const htmlToken = findToken(
-              tokens,
-              Nesting.selfClose,
-              TagType.html
-            )
-            _assert(htmlToken)
-            htmlToken.attrs = [
-              ...(htmlToken.attrs ?? []),
-              ...(token.attrs ?? [])
-            ]
-          } else if (
-            token.content?.trim().startsWith('<body')
-          ) {
-            const bodyToken = findToken(
-              tokens,
-              Nesting.selfClose,
-              TagType.body
-            )
-            _assert(bodyToken)
-            bodyToken.attrs = [
-              ...(bodyToken.attrs ?? []),
-              ...(token.attrs ?? [])
-            ]
+          let found = false
+          ;[TagType.html, TagType.body].forEach((type) => {
+            if (
+              token.content?.trim().startsWith(`<${type}`)
+            ) {
+              const tag = findToken(
+                tokens,
+                Nesting.selfClose,
+                type
+              )
+              _assert(tag)
+              logger.log('Found tag', tag)
+
+              const attrsRegex = /(\w+)=["']([^"']*)["']/g
+              const attrs =
+                token.content?.matchAll(attrsRegex)
+              tag.attrs = [
+                ...(tag.attrs ?? []),
+                ...Array.from(attrs).map((attr) => {
+                  const [_, key, val] = attr
+                  return [key, val] as [string, string]
+                })
+              ]
+              logger.log('Updated tag', tag.attrs)
+              found = true
+            }
+          })
+          if (found) {
+            tokens.splice(i, 1)
           }
         }
       })
@@ -293,18 +362,24 @@ export const getMiniMdPlugin = (): Rule => {
               child.type === 'link_open' &&
               child.attrGet('href')?.startsWith('md:')
           )
-          ?.map((child) => child.attrGet('href'))
+          ?.map((child) => ({
+            href: child.attrGet('href'),
+            meta: child.meta
+          }))
         _assert(hrefs?.length, 'No hrefs found')
         tokens.splice(
           token,
           1,
           ...hrefs
-            .map((href) => {
+            .map((child) => {
+              const { href, meta } = child
               _assert(href, 'Href should be defined')
               logger.log('Found href', href)
-              const filePath = href.slice(3)
-              const markdownFile =
-                readMarkdownFile(filePath)
+              const { attrs } = meta ?? {}
+              const markdownFile = readMarkdownFile(
+                href.slice(3),
+                attrs
+              )
               if (markdownFile) {
                 return md.parse(markdownFile, {
                   skipCustom: true
@@ -341,6 +416,8 @@ export const getMiniMdPlugin = (): Rule => {
 export const registerRules = () => {
   ruleRegister = {
     [PluginOrder['html-structure']]: getHtmlPlugin(),
+    [PluginOrder['link-with-attrs']]:
+      getLinkWithAttrsPlugin(),
     [PluginOrder['capture-attrs']]: getCaptureAttrsPlugin(),
     [PluginOrder.miniMd]: getMiniMdPlugin(),
     [PluginOrder['move-head']]: getMovePlugin(

@@ -1,5 +1,5 @@
 <head>
-    <meta name="description" content="This is an advanced example of mini-md." />
-    <title>Advanced Example</title>
+    <meta name="description" content="{description}" />
+    <title>{title}</title>
     <link rel="stylesheet" href="style.css" />
 </head>

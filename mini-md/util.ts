@@ -9,7 +9,10 @@ import path from 'node:path'
 import { fs2 } from '@naturalcycles/nodejs-lib'
 import {
   _jsonEquals,
-  _stringEnumKeyOrUndefined
+  _mapToObject,
+  _objectAssign,
+  _stringEnumKeyOrUndefined,
+  pupa
 } from '@naturalcycles/js-lib'
 
 export const logger: {
@@ -43,10 +46,14 @@ export const buildToken = (
 }
 
 export const readMarkdownFile = (
-  filePath: string
+  filePath: string,
+  attrs: Record<string, string> = {}
 ): string | null => {
+  // Make equal signs escapeable.
   const views = getSetting('views', '')
   logger.log('views', views)
+  logger.log('filePath', filePath)
+  logger.log('attrs', attrs)
 
   const resolved = path.resolve(
     process.cwd(),
@@ -64,7 +71,14 @@ export const readMarkdownFile = (
     return null
   }
 
-  return fs2.readText(resolved)
+  const baseAttrs = {
+    'curly-open': '{'
+  }
+
+  return pupa(
+    fs2.readText(resolved),
+    _objectAssign(baseAttrs, attrs)
+  )
 }
 
 export const isMiniMdToken = (
