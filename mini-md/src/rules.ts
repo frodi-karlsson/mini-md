@@ -15,7 +15,6 @@ import {
   buildToken,
   findToken,
   isMiniMdToken,
-  isContiguous,
   logger,
   readMarkdownFile
 } from './util'
