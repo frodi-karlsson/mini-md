@@ -108,25 +108,3 @@ export const findToken = (
     )
   return token ?? null
 }
-
-/**
- * Determines if an array of numbers is contiguous.
- */
-export const isContiguous = (arr: number[]): boolean => {
-  // We allow empty arrays to be considered isContiguous. [0, 0] exclusive.
-  if (arr.length === 0) {
-    return true
-  }
-  let i = 1
-  let prev = arr[0]
-
-  while (i < arr.length) {
-    if (arr[i] !== prev + 1) {
-      return false
-    }
-    prev = arr[i]
-    i++
-  }
-
-  return true
-}

@@ -194,7 +194,7 @@ export const insertIntoTag = (
   tokens: Token[],
   tagType: TagType,
   nesting: Nesting,
-  range: number[],
+  tokenIndices: number[],
   processTokens?: (tokens: Token[]) => Token[]
 ) => {
   const tag = findToken(tokens, nesting, tagType)
@@ -203,20 +203,15 @@ export const insertIntoTag = (
     'Tag should be initialized with children: ' + tagType
   )
 
-  if (!range.length) {
-    return
-  }
-
-  const resolvedRange = tokens.slice(
-    _first(range),
-    _last(range) + 1
-  )
   const readyTokens = processTokens
-    ? processTokens(resolvedRange)
-    : resolvedRange
+    ? processTokens(tokenIndices.map((i) => tokens[i]))
+    : tokenIndices.map((i) => tokens[i])
 
   tag.children.push(...readyTokens)
-  tokens.splice(_first(range), range.length)
+  const sorted = tokenIndices.sort((a, b) => b - a)
+  sorted.forEach((i) => {
+    tokens.splice(i, 1)
+  })
 }
 
 export const initMovePluginInternal = (
@@ -230,10 +225,6 @@ export const initMovePluginInternal = (
       `Running move:${name} plugin with intoTag: ${intoTag}`
     )
     const newTokens = takeTokens(tokens)
-    _assert(
-      isContiguous(newTokens),
-      'Tokens should be range-like'
-    )
     insertIntoTag(
       tokens,
       intoTag,
