@@ -1,17 +1,15 @@
 {
   "name": "mini-md",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "An express view engine that serves as a templating engine for markdown files",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
   "exports": {
     ".": {
       "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "author": "frodi-karlsson <frodikarlsson@gmail.com>",
@@ -28,10 +26,10 @@
     "url": "https://github.com/frodi-karlsson/mini-md"
   },
   "scripts": {
-    "dev": "tsx watch index.ts",
-    "build": "tsup",
-    "lint": "eslint .",
-    "prepublish": "yarn build"
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "watch": "npm run build -- --watch src",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@naturalcycles/js-lib": "^14.225.0",
