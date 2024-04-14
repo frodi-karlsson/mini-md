@@ -9,6 +9,7 @@
     "author": "frodi-karlsson",
     "license": "MIT",
     "dependencies": {
+        "express": "^4.19.2",
         "mini-md": "^2.0.0"
     },
     "devDependencies": {
