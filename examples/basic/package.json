@@ -9,7 +9,7 @@
     "author": "frodi-karlsson",
     "license": "MIT",
     "dependencies": {
-        "mini-md": "^1.0.0"
+        "mini-md": "^2.0.0"
     },
     "devDependencies": {
         "nodemon": "^2.0.7",
