@@ -9,13 +9,13 @@ This is an advanced example of mini-md!{.description}
 
 This example uses a custom CSS file to style the HTML output. The CSS file is linked in the HTML output using a `<link>` tag in the `head` fragment. A cool thing here is the template binding in the `title` tag, where we pass in the title of the document:
 
-```md
+```md {.prettyprint lang=md .linenums}
 [](md:fragments/head.md, title=Advanced Example, description=This is an advanced example of mini-md.)
 ```
 
 where fragments/head.md is:
 
-```html
+```html {.prettyprint lang=html .linenums}
 <head>
     <meta name="description" content="This is an advanced example of mini-md." />
     <title>{curly-open}title}</title>
@@ -29,19 +29,19 @@ P.S. The `curly-open` is a placeholder for the curly open bracket `{` to prevent
 
 It also uses a body fragment to include attributes in the document's body tag:
 
-```md
+```md {.prettyprint lang=md .linenums}
 [](md:fragments/body.md)
 ```
 
 where fragments/body.md is:
 
-```html
+```html {.prettyprint lang=html .linenums}
 <body class="body" />
 ```
 
 We also provide a binding from the render function:
 
-```ts
+```ts {.prettyprint lang=ts .linenums}
 app.get("/", (req, res) => {
   res.render("index.md", { bindings: { msg: "Hello, world!" } });
 });

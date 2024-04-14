@@ -17,6 +17,21 @@
 code {
     background-color: #444;
     border-radius: 4px;
+    white-space: pre-wrap;
+}
+
+pre {
+    width: 100%;
+}
+
+pre code {
+    display: block;
+    padding: 16px;
+    overflow-x: auto;
+}
+
+pre code li[class^="L"]:hover {
+    filter: brightness(1.5)
 }
 
 @keyframes bounce {
