@@ -1,6 +1,7 @@
 export enum PluginOrder {
   'html-structure' = 1,
   'miniMd' = 2,
+  'capture-attrs' = 3,
   'move-head' = 4,
   'move-body' = 5,
   'render-html:head' = 6,

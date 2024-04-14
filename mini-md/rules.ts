@@ -69,6 +69,57 @@ export const getHtmlPlugin = (): Rule => {
 }
 
 /**
+ * Captures <body ...> and <html ...> tags, removes them, and stores their attributes
+ * in their respective tokens.
+ */
+export const getCaptureAttrsPlugin = (): Rule => {
+  return {
+    type: 'core',
+    rule: (state) => {
+      logger.log('Running captureAttrs plugin')
+      if (state.env.skipCustom) {
+        logger.log(
+          'Skipping custom rules for captureAttrs plugin'
+        )
+        return false
+      }
+      const { tokens } = state
+      tokens.forEach((token) => {
+        if (token.type === 'html_block') {
+          logger.log('Found html_block token', token)
+          if (token.content?.trim().startsWith('<html')) {
+            const htmlToken = findToken(
+              tokens,
+              Nesting.selfClose,
+              TagType.html
+            )
+            _assert(htmlToken)
+            htmlToken.attrs = [
+              ...(htmlToken.attrs ?? []),
+              ...(token.attrs ?? [])
+            ]
+          } else if (
+            token.content?.trim().startsWith('<body')
+          ) {
+            const bodyToken = findToken(
+              tokens,
+              Nesting.selfClose,
+              TagType.body
+            )
+            _assert(bodyToken)
+            bodyToken.attrs = [
+              ...(bodyToken.attrs ?? []),
+              ...(token.attrs ?? [])
+            ]
+          }
+        }
+      })
+      return false
+    }
+  }
+}
+
+/**
  * Moves tokens into the specified tag if they match the specified criteria.
  */
 export const insertIntoTag = (
@@ -234,6 +285,36 @@ export const getMiniMdPlugin = (): Rule => {
     rule: (state) => {
       logger.log('Running miniMd plugin')
       const { tokens, md } = state
+      const handleToken = (token: number): void => {
+        logger.log('Found token', tokens[token])
+        const hrefs = tokens[token].children
+          ?.filter(
+            (child) =>
+              child.type === 'link_open' &&
+              child.attrGet('href')?.startsWith('md:')
+          )
+          ?.map((child) => child.attrGet('href'))
+        _assert(hrefs?.length, 'No hrefs found')
+        tokens.splice(
+          token,
+          1,
+          ...hrefs
+            .map((href) => {
+              _assert(href, 'Href should be defined')
+              logger.log('Found href', href)
+              const filePath = href.slice(3)
+              const markdownFile =
+                readMarkdownFile(filePath)
+              if (markdownFile) {
+                return md.parse(markdownFile, {
+                  skipCustom: true
+                })
+              }
+              return []
+            })
+            .flat()
+        )
+      }
       tokens
         .map((_, i) => i)
         .filter(
@@ -246,28 +327,7 @@ export const getMiniMdPlugin = (): Rule => {
             )
         )
         .forEach((token) => {
-          logger.log('Found token', tokens[token])
-          const href = tokens[token].children
-            ?.find(
-              (child) =>
-                child.type === 'link_open' &&
-                child.attrGet('href')?.startsWith('md:')
-            )
-            ?.attrGet('href')
-          _assert(href)
-          const filePath = href.slice(3)
-          const markdownFile = readMarkdownFile(filePath)
-          if (markdownFile) {
-            tokens.splice(
-              token,
-              1,
-              ...[
-                ...md.parse(markdownFile, {
-                  skipCustom: true
-                })
-              ]
-            )
-          }
+          handleToken(token)
         })
       return false
     }
@@ -281,6 +341,7 @@ export const getMiniMdPlugin = (): Rule => {
 export const registerRules = () => {
   ruleRegister = {
     [PluginOrder['html-structure']]: getHtmlPlugin(),
+    [PluginOrder['capture-attrs']]: getCaptureAttrsPlugin(),
     [PluginOrder.miniMd]: getMiniMdPlugin(),
     [PluginOrder['move-head']]: getMovePlugin(
       TagType.head,

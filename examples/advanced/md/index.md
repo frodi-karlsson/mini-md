@@ -1,4 +1,5 @@
 [](md:fragments/head.md)
+[](md:fragments/body.md)
 
 # Welcome to this advanced example {.welcome}
 
@@ -7,6 +8,8 @@ This is an advanced example of mini-md!{.description}
 ## What's different?
 
 This example uses a custom CSS file to style the HTML output. The CSS file is linked in the HTML output using a `<link>` tag in the `head` fragment.
+
+It also uses a body fragment to include attributes in the document's body tag.
 
 ## How does it work?
 
