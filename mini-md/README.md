@@ -37,6 +37,14 @@ Note that this means you need to escape opening curly braces in your markdown fi
 This is an opening curly: {curly-open}
 ```
 
+You can also provide a bindings object to the render function:
+
+```ts
+app.get("/", (req, res) => {
+  res.render("index.md", { bindings: { key: "value", key2: "value2" } });
+});
+```
+
 ### Modifying the document
 
 You can add \<head> tags straight to your markdown if you supply `html: true` into `mdOptions`:

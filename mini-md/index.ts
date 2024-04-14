@@ -46,7 +46,7 @@ export const miniMd = (props?: MiniMdProps): ViewEngine => {
     callback
   ) => {
     logger.log('Received options', rendererOptions)
-    options.settings = rendererOptions.settings
+    _objectAssign(options, rendererOptions)
     logger.log('Received path', path)
     const markdownFile = readMarkdownFile(path)
 

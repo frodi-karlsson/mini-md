@@ -77,7 +77,7 @@ export const readMarkdownFile = (
 
   return pupa(
     fs2.readText(resolved),
-    _objectAssign(baseAttrs, attrs)
+    Object.assign(baseAttrs, attrs, options.bindings)
   )
 }
 

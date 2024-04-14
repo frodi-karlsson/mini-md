@@ -24,7 +24,11 @@ const notFound: RequestHandler = (_, res) => {
 }
 
 app.get('/', (_, res) => {
-  res.render('index.md')
+  res.render('index.md', {
+    bindings: {
+      msg: 'Hello, world!'
+    }
+  })
 })
 
 app.use(notFound)

@@ -44,6 +44,16 @@ where fragments/body.md is:
 <body class="body" />
 ```
 
+We also provide a binding from the render function:
+
+```ts
+app.get("/", (req, res) => {
+  res.render("index.md", { bindings: { msg: "Hello, world!" } });
+});
+```
+
+Here's that message: {msg}
+
 ## How does it work?
 
 Well, this md file is passing two things to the `mini-md` package:
