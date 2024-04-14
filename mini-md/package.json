@@ -27,8 +27,8 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
-    "watch": "npm run build -- --watch src",
-    "prepublishOnly": "npm run build",
+    "watch": "yarn build -- --watch src",
+    "prepublishOnly": "yarn build",
     "lint": "eslint .",
     "test": "jest"
   },
