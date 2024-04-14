@@ -12,7 +12,7 @@ module.exports = [
       }
     },
     plugins: { typescript },
-    files: ['**/src/**/*.ts'],
+    files: ['**/src/**/*.ts', '**/test/**/*.ts'],
     ...eslintConfigPrettier,
     ...eslintPluginPrettierRecommended
   }
