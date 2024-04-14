@@ -1,6 +1,6 @@
 {
   "name": "mini-md",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "An express view engine that serves as a templating engine for markdown files",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -12,6 +12,9 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "files": [
+    "dist"
+  ],
   "author": "frodi-karlsson <frodikarlsson@gmail.com>",
   "license": "MIT",
   "type": "module",
