@@ -24,6 +24,7 @@ jobs:
 
     github-pr-release:
         needs: build
+        if: github.ref_name == 'refs/heads/prod'
         permissions:
             contents: read
             pull-requests: write
