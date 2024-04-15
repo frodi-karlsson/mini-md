@@ -61,3 +61,5 @@ export const miniMd = (props?: MiniMdProps): ViewEngine => {
     }
   }
 }
+
+export * as utils from './util'
