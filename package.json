@@ -14,11 +14,19 @@
     "deploy": "yarn workspace mini-md deploy",
     "build": "yarn workspace mini-md build",
     "lint": "yarn workspace mini-md lint",
-    "test": "yarn workspace mini-md test"
+    "test": "yarn workspace mini-md test",
+    "script:release-pr": "ts-node scripts/release-pr.ts"
   },
-  "pre-commit": ["lint", "build", "test"],
+  "pre-commit": [
+    "lint",
+    "build",
+    "test"
+  ],
   "pre-commit.silent": true,
   "devDependencies": {
-    "pre-commit": "^1.2.2"
+    "github-pr-release": "^1.3.6",
+    "pre-commit": "^1.2.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   }
 }

@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "A basic example of using the mini-md package",
     "main": "example.ts",
+    "private": true,
     "scripts": {
         "dev": "nodemon example.ts"
     },

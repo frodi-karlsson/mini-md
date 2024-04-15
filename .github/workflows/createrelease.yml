@@ -1,18 +1,24 @@
 name: github-pr-release
 
 on:
-  push:
-    branches:
-    - main
+  workflow_run:
+    workflows: ["Lint, build and test"]
+    types: [completed]
+    branches: [main]
 
 jobs:
   github-pr-release:
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: yutailang0119/action-github-pr-release@v3
+      - uses: actions/setup-node@v3
         with:
-          token: ${{ github.token }}
-          production-branch: prod
-          staging-branch: main
-          label: Release
+          node-version: '20.x'
+      - run: npm install -g yarn
+      - run: yarn install --frozen-lockfile
+      - run: yarn script:release-pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
