@@ -26,7 +26,7 @@ jobs:
         - run: yarn test
 
     github-pr-release:
-        if: github.path == 'mini-md/**' 
+        if: github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files, 'mini-md/')
         needs: build
         permissions:
             contents: read
