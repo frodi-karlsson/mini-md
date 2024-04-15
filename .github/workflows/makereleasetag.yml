@@ -12,7 +12,31 @@ jobs:
       runs-on: ubuntu-latest
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
       steps:
-        - uses: rymndhng/release-on-push-action@master
+        - name: Create Release Tag
+          id: rel
+          uses: rymndhng/release-on-push-action@master
           with:
-            bump_version_scheme: minor
+            bump_version_scheme: patch
+      outputs:
+        release_tag: ${{ steps.rel.outputs.tag_name }}
+        
+    publish:
+        needs: release-on-push
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            id-token: write
+        steps:
+        - uses: actions/checkout@v3
+        - uses: actions/setup-node@v3
+          with:
+            node-version: '20.x'
+            registry-url: 'https://registry.npmjs.org'
+        - run: npm install -g yarn
+        - run: yarn install --frozen-lockfile
+        - run: yarn workspace mini-md publish --provenance --tag ${{ needs.release-on-push.outputs.release_tag}}
+          env:
+            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+                
