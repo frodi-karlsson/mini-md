@@ -36,7 +36,12 @@ jobs:
             registry-url: 'https://registry.npmjs.org'
         - run: npm install -g yarn
         - run: yarn install --frozen-lockfile
-        - run: |
+        - name: Setup git user
+          run: |
+            git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
+            git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
+        - name: Publish
+          run: |
             version=${{ needs.release-on-push.outputs.release_tag }}
             echo "Publishing version $version"
             yarn workspace mini-md publish --provenance --new-version ${version/v/}
