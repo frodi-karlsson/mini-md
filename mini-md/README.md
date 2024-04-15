@@ -93,3 +93,9 @@ and thanks for all the fish!
 ```
 
 See the [examples](../examples) if you want to see it in action.
+
+## Todos
+
+- [ ] Test more extensively
+- [ ] Simplify the code
+- [ ] Make a prettier plugin for the md syntax + html
