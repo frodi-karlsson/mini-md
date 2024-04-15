@@ -36,7 +36,10 @@ jobs:
             registry-url: 'https://registry.npmjs.org'
         - run: npm install -g yarn
         - run: yarn install --frozen-lockfile
-        - run: yarn workspace mini-md publish --provenance --tag ${{ needs.release-on-push.outputs.release_tag}}
+        - run: |
+            version=${{ needs.release-on-push.outputs.release_tag }}
+            echo "Publishing version $version"
+        - run: yarn workspace mini-md publish --provenance --tag ${version/v/}
           env:
             NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
                 
