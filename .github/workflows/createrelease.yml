@@ -1,0 +1,18 @@
+name: github-pr-release
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  github-pr-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: yutailang0119/action-github-pr-release@v3
+        with:
+          token: ${{ github.token }}
+          production-branch: prod
+          staging-branch: main
+          label: Release
