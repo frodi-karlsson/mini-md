@@ -62,7 +62,7 @@ export type Rule =
     }
   | {
       type: 'inline'
-      rule: MarkdownIt.ParserInline.RuleInline
+      rule: MarkdownIt.ParserInline.RuleInline2
     }
   | {
       type: 'renderer'

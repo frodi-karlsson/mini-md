@@ -30,5 +30,8 @@
   },
   "dependencies": {
     "axios": "^1.6.8"
+  },
+  "resolutions": {
+    "semver": "^7.6.0"
   }
 }

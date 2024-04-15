@@ -2,7 +2,6 @@ import express from 'express'
 import { miniMd } from 'mini-md'
 import markdownItAttrs from 'markdown-it-attrs'
 import { RequestHandler } from 'express-serve-static-core'
-import hljs from 'highlight.js'
 
 const app = express()
 

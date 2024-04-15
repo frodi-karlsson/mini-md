@@ -6,6 +6,9 @@ on:
     
 jobs:
     release-on-push:
+      permissions:
+        contents: write
+        pull-requests: read
       runs-on: ubuntu-latest
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -108,3 +108,18 @@ export const findToken = (
     )
   return token ?? null
 }
+
+export const hrefSplitRegex = /(?<!\\),/g
+export const attrSplitRegex = /(?<!\\)=/g
+export const mdLinkRegex = /\(([\n\s\t]*)(?<!\\)(md:.*)\)/g
+
+/**
+ * Helper function to escape a string so we don't get infinite loops.
+ */
+export const escapeString = (str: string): string => {
+  return str
+    .replace(/\{/g, '{curly-open}')
+    .replace(hrefSplitRegex, '\\,')
+    .replace(attrSplitRegex, '\\=')
+    .replace(mdLinkRegex, '($1\\$2)')
+}
