@@ -1,3 +1,6 @@
+![NPM Unpacked Size](https://img.shields.io/npm/unpacked-size/mini-md)
+![NPM Version](https://img.shields.io/npm/v/mini-md)
+
 # mini-md
 
 A view engine / template engine for express that can serve your markdown files as HTML.
