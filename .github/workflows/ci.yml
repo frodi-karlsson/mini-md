@@ -3,7 +3,6 @@ name: Lint, build and test
 on:
   push:
     branches: [main, prod]
-    paths: ['mini-md/**']
   pull_request:
     branches: [main, prod]
 
