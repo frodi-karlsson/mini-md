@@ -1,8 +1,7 @@
 name: Publish Package to npmjs
 on:
-  workflow_run:
-    workflows: ["Make Release Tag"]
-    types: [completed]
+  release:
+    types: [published, created]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,6 +16,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - run: npm install -g yarn
       - run: yarn install --frozen-lockfile
-      - run: yarn workspace mini-md publish --provenance
+      - run: yarn workspace mini-md publish --provenance 
         env:
+          VERSON: ${{ github.event.release.tag_name }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
