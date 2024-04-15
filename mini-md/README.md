@@ -92,6 +92,20 @@ In `./md/index.md`:
 and thanks for all the fish!
 ```
 
+Or even something like this:
+
+header:
+
+```md
+# So long {msg}
+```
+
+index:
+
+```md
+[](md:fragments/header.md, msg=and thanks for all the fish!)
+```
+
 See the [examples](../examples) if you want to see it in action.
 
 ## Todos
